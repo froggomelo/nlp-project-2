@@ -138,16 +138,17 @@ def main():
     methods = ["oracle", "none", "mean-centre", "pairs"]
     for false_frac, name in zip(FALSE_FRACS, ["fig_synthetic.png", "fig_synthetic_noisy.png"]):
         agg = t[t["false_frac"] == false_frac].drop(columns="false_frac").groupby("delta").agg(["mean", "std"])
-        fig, ax = plt.subplots(figsize=(4.6, 3.1))
+        # drawn at the report's column width (3.4 in), so labels print at their real size; no title,
+        # the caption carries it
+        fig, ax = plt.subplots(figsize=(3.4, 1.9))
         for m, style in zip(methods, ["k-", "x:", "s--", "o-"]):
             ax.errorbar(agg.index, agg[(f"{m}_gap", "mean")], yerr=agg[(f"{m}_gap", "std")], fmt=style,
-                        capsize=3, label=m)
+                        capsize=2, ms=4, label=m)
         ax.axhline(0, color="grey", lw=0.7)
-        ax.set_xlabel(r"planted audience effect $\delta$")
-        ax.set_ylabel("test gap (all - pair floor)")
-        title = "Synthetic check: which method recovers the true gap?"
-        ax.set_title(title if false_frac == 0 else f"{title}\n({false_frac:.0%} of pairs false)", fontsize=9)
-        ax.legend(frameon=False, fontsize=8)
+        ax.set_xlabel(r"planted audience effect $\delta$", fontsize=8)
+        ax.set_ylabel("test gap", fontsize=8)
+        ax.tick_params(labelsize=7)
+        ax.legend(frameon=False, fontsize=7, ncol=2)
         fig.tight_layout()
         fig.savefig(out / name, dpi=200)
     agg = t.groupby(["false_frac", "delta"]).agg(["mean"])

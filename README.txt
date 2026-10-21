@@ -125,12 +125,43 @@ CHANGES ON 21 OCTOBER 2026 (team note: delete this section before submission)
     still finds a positive gap but underestimates it (0.045 vs 0.059), and mean-centring still reports
     0: noisy pairs make the H1 estimate cautious, not inflated.
 
-  Next steps, in order (whoever has the data)
-    1. python src/run_all.py prepare        rebuilds the normaliser candidates under the new check
-    2. python src/normalise.py sheet        regenerates the labelling sheet, now with prefix joins before
-                                            names (the current sheet is blank, so nothing is lost)
-    3. python src/make_colab_bundle.py, then Run all on Colab: modern and modern_prefix must be
-       re-embedded because their text changed
-    4. Label pairs and normaliser words, then one final python src/run_all.py analyse
-    Expect the modern-variant numbers to move (the prefix rule now rewrites far fewer tokens); the raw
-    H1 result is unaffected by the normaliser change.
+  Colab run after these changes (later on 21 October)
+    Steps 1-3 of the old next-steps list are done: the bundle was rebuilt with the new normaliser and
+    every variant re-embedded. The new normaliser rewrites 9.1% of isiXhosa tokens (was 12.4%):
+    aspiration 289,816 tokens (7.8%, unchanged), prefix joins before names 47,517 (was 169,556),
+    prefix joins before lowercase words 797. Raw LaBSE pair candidates are identical to the earlier
+    run, and E5's matched threshold is 0.857 (keeps 24.6% of its candidates).
+    The analysis then failed: classify.py was killed by Colab for running out of memory
+    (SIGKILL 9), for both LaBSE and E5, so no stage1.json, compare or qualitative results exist yet.
+
+  Out-of-memory bug fixed
+    9. classify.py      kept a full copy of the embeddings for each of the 9 methods, and every
+                        logistic-regression fit left a ~0.3 GB float64 copy of the training data in
+                        reference cycles; across 54 fits this reached ~13 GB. Each method is now scored
+                        on validation and test straight away and its copy freed, and garbage is
+                        collected after every fit. Peak memory at full size (68,392 x 768): 13.1 GB ->
+                        2.2 GB, with identical results; about one minute per classifier run.
+    10. run_all.py      the 0.65 robustness run can no longer stop the pipeline: if it fails, a
+                        warning is printed and compare.py and qualitative.py still run.
+    11. synthetic_check.py  figures redrawn at the report's column width (3.4 in) so labels print
+                        legibly; same numbers.
+    Tested end to end with the package versions Colab used (scikit-learn 1.6.1, pandas 2.2.3,
+    numpy 2.1.3), including a full-size stand-in dataset for the memory check.
+
+  Expected notice, not an error
+    "multilingual-e5-base: no embeddings for ['modern_asp', 'modern_prefix']; analysing ['raw',
+    'modern']". The notebook embeds only raw and modern with E5 (the robustness check); the
+    single-rule ablations run on LaBSE only.
+
+  Next steps, in order
+    1. Rerun the analysis on Colab with the fixed src/classify.py and src/run_all.py:
+         session still open   upload both files into src/, rerun only the analysis cell and the
+                              zip/download cell (no re-embedding; ~10-20 min)
+         session closed       python src/make_colab_bundle.py, then Run all (~1 h)
+       Watch for "chosen C ... is at the edge of the grid": C=1000 was often chosen in the failed run.
+    2. Send results/tool_metrics/tool_metrics.csv from the machine that ran prepare: Table 1's
+       "modern" row must be updated for the new normaliser (it was not in results_all.zip).
+    3. Label translated pairs (labels/LABELLING_GUIDE.md, job 1); the team can do this from shared
+       names and numbers. The normaliser words (job 2) need a fluent isiXhosa reader: if nobody is
+       available, skip them and report the thresholds as fixed in advance.
+    4. One final python src/run_all.py analyse after labelling.
