@@ -92,8 +92,11 @@ def main():
     if a.model_tag == "LaBSE":
         used = json.loads(Path("results/raw/stage1.json").read_text())["threshold"]
         if a.robust_threshold > used:
-            sh("src/classify.py", "--variant", "raw", *tag, "--threshold", str(a.robust_threshold),
-               "--run-name", f"raw_thr{a.robust_threshold}")
+            try:  # a robustness check must not stop the main analysis
+                sh("src/classify.py", "--variant", "raw", *tag, "--threshold", str(a.robust_threshold),
+                   "--run-name", f"raw_thr{a.robust_threshold}")
+            except subprocess.CalledProcessError:
+                print(f"\nWARNING: robustness run at threshold {a.robust_threshold} failed; continuing")
     for v in variants[1:]:
         sh("src/classify.py", "--variant", v, "--pairs-from", "raw", "--k-from", "raw", *tag, *thr)
     if len(variants) > 1:

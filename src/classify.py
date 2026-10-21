@@ -27,6 +27,7 @@ Usage:
     python src/classify.py --variant raw --threshold 0.65 --run-name raw_thr0.65   # robustness run
 """
 import argparse
+import gc
 import json
 from pathlib import Path
 
@@ -71,6 +72,10 @@ def fit_best_c(Xtr, ytr, Xva, yva, seed):
         s = ba(m, Xva, yva)
         if best is None or s > best[0]:
             best = (s, C, m)
+        # each fit leaves a float64 copy of the training data (~0.3 GB) in reference cycles; without an
+        # explicit collection these pile up across the 54 fits and Colab kills the process
+        del m
+        gc.collect()
     return best
 
 
@@ -169,23 +174,37 @@ def main():
         px, pe, _ = pair_rows(df, pairs, s)
         pair_idx[s] = np.concatenate([px, pe])
 
-    # comparison: per-language mean-centring (means from train)
-    rows = []
-    variants = [("mean-centre", None)] + [(f"pairs k={k}", k) for k in K_GRID]
+    # Each method's transformed embeddings are built, scored on validation and test, then freed: keeping a
+    # copy per method (9 x 68k x 768 floats) ran Colab out of memory. Only predictions are kept.
     full_basis = language_basis(emb, tr_x, tr_e, max(K_GRID))
-    for name, k in variants:
-        if k is None:
-            X = emb.copy()
-            for lang in ["xh", "en"]:
-                m = (df["lang"] == lang).to_numpy()
-                X[m] -= emb[m & (split == "train")].mean(0)
-        else:
-            X = project_out(emb, full_basis[:k])
+    train_means = {lang: emb[((df["lang"] == lang).to_numpy()) & (split == "train")].mean(0) for lang in ["xh", "en"]}
+
+    def transformed(k):
+        """Embeddings with language removed: per-language mean-centring if k is None, else top-k pair directions."""
+        if k is not None:
+            return project_out(emb, full_basis[:k])
+        X = emb.copy()
+        for lang, mu in train_means.items():
+            X[(df["lang"] == lang).to_numpy()] -= mu
+        return X
+
+    test_idx = sets["test"]
+    pair_mask = np.zeros(len(df), bool)
+    pair_mask[pair_idx["test"]] = True
+    rows = []
+    for name, k in [("mean-centre", None)] + [(f"pairs k={k}", k) for k in K_GRID]:
+        X = transformed(k)
         s_val, C, model = fit_best_c(X[sets["train"]], y[sets["train"]], X[sets["val"]], y[sets["val"]], args.seed)
         floor_val = ba(model, X[pair_idx["val"]], y[pair_idx["val"]])
+        pred_test = model.predict(X[test_idx])
+        a = balanced_accuracy_score(y[test_idx], pred_test)
+        f = balanced_accuracy_score(y[pair_mask], model.predict(X[pair_mask]))
         rows.append(dict(method=name, k=k, C=C, val_all=s_val, val_floor=floor_val, val_gap=s_val - floor_val,
-                         _X=X, _model=model))
+                         test_all=a, test_floor=f, test_gap=a - f, _model=model, _pred_test=pred_test))
+        del X
+        gc.collect()
         print(f"{name:12s} C={C:<5} val all={s_val:.3f} floor={floor_val:.3f} gap={s_val - floor_val:+.3f}", flush=True)
+    table = [{key: v for key, v in r.items() if not key.startswith("_")} for r in rows]
 
     pair_rows_k = [r for r in rows if r["k"] is not None]
     if args.k_from:
@@ -194,20 +213,9 @@ def main():
     else:
         chosen = next((r for r in pair_rows_k if r["val_floor"] <= args.floor_target), pair_rows_k[-1])
 
-    # test evaluation for the chosen k (and the comparisons, for the table)
-    test_idx = sets["test"]
-    pair_mask = np.zeros(len(df), bool)
-    pair_mask[pair_idx["test"]] = True
-    table = []
-    for r in rows:
-        pred = r["_model"].predict(r["_X"][test_idx])
-        a = balanced_accuracy_score(y[test_idx], pred)
-        f = balanced_accuracy_score(y[pair_mask], r["_model"].predict(r["_X"][pair_mask]))
-        table.append({k: v for k, v in r.items() if not k.startswith("_")} |
-                     dict(test_all=a, test_floor=f, test_gap=a - f))
-    X, model = chosen["_X"], chosen["_model"]
+    model = chosen["_model"]
     pred_all = np.full(len(df), -1)
-    pred_all[test_idx] = model.predict(X[test_idx])
+    pred_all[test_idx] = chosen["_pred_test"]
     ci = bootstrap_gap(y[test_idx], pred_all[test_idx], df["issue"].to_numpy()[test_idx],
                        pair_mask[test_idx], args.n_boot, args.seed)
     c_edge = chosen["C"] in (min(C_GRID), max(C_GRID))
@@ -221,7 +229,7 @@ def main():
     if not args.no_knn:
         for r in rows:
             if r["method"] in ("mean-centre", "pairs k=0", chosen["method"]):
-                knn[r["method"]] = knn_check(r["_X"], y, sets, pair_idx, args.seed)
+                knn[r["method"]] = knn_check(transformed(r["k"]), y, sets, pair_idx, args.seed)
                 print(f"kNN {r['method']:12s} test all={knn[r['method']]['test_all']:.3f} "
                       f"floor={knn[r['method']]['test_floor']:.3f} gap={knn[r['method']]['test_gap']:+.3f}",
                       flush=True)
@@ -237,7 +245,7 @@ def main():
     (res_dir / "stage1.json").write_text(json.dumps(summary, indent=1, default=float))
 
     # per-chunk test probabilities for the qualitative analysis (which isiXhosa content looks 'English-like')
-    proba = model.predict_proba(X[test_idx])[:, 1]
+    proba = model.predict_proba(transformed(chosen["k"])[test_idx])[:, 1]
     out = df.iloc[test_idx][["chunk_id", "issue", "year", "page", "lang", "text"]].assign(
         y=y[test_idx], pred=pred_all[test_idx], p_xh=proba, in_pair=pair_mask[test_idx])
     out.to_parquet(res_dir / "stage1_test_predictions.parquet", index=False)
