@@ -16,9 +16,15 @@ For the raw-vs-modern comparison, every variant uses the SAME reference pairs an
 raw run (--pairs-from raw --k-from raw), so a change in the floor reflects the text, not a re-tuned
 language-removal step. C is still tuned per variant.
 
+Non-linear check: a linear probe cannot use a difference whose class means are equal, which is
+exactly what mean-centring produces. So the gap is also reported for a cosine kNN probe (trained on a
+class-balanced sample of train chunks, number of neighbours tuned on validation) for no removal,
+mean-centring and the chosen k.
+
 Usage:
     python src/classify.py --variant raw [--threshold 0.55]
     python src/classify.py --variant modern --pairs-from raw --k-from raw
+    python src/classify.py --variant raw --threshold 0.65 --run-name raw_thr0.65   # robustness run
 """
 import argparse
 import json
@@ -29,6 +35,7 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import balanced_accuracy_score
+from sklearn.neighbors import NearestNeighbors
 
 from common import load_embeddings, load_usable, run_dir
 
@@ -36,7 +43,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 K_GRID = [0, 1, 2, 4, 8, 16, 32, 64]
-C_GRID = [0.01, 0.1, 1.0, 10.0]
+C_GRID = [0.01, 0.1, 1.0, 10.0, 100.0, 1000.0]
+KNN_K = [5, 25, 101]  # odd, so majority votes cannot tie
 
 
 def language_basis(emb, idx_xh, idx_en, k):
@@ -64,6 +72,30 @@ def fit_best_c(Xtr, ytr, Xva, yva, seed):
         if best is None or s > best[0]:
             best = (s, C, m)
     return best
+
+
+def knn_check(X, y, sets, pair_idx, seed, max_per_class=15000):
+    """Gap for a cosine kNN probe: n_neighbours tuned on validation all-chunk BA, then test all/floor/gap."""
+    rng = np.random.default_rng(seed)
+    tr = sets["train"]
+    n = min(max_per_class, *(int((y[tr] == c).sum()) for c in (0, 1)))
+    tr = np.concatenate([rng.choice(tr[y[tr] == c], n, replace=False) for c in (0, 1)])
+    Xn = X / (np.linalg.norm(X, axis=1, keepdims=True) + 1e-9)  # euclidean on unit vectors = cosine
+    nn = NearestNeighbors(n_neighbors=max(KNN_K)).fit(Xn[tr])
+    res = {}
+    for s in ["val", "test"]:
+        votes = y[tr][nn.kneighbors(Xn[sets[s]], return_distance=False)]  # neighbour labels, nearest first
+        in_pair = np.isin(sets[s], pair_idx[s])
+        ys = y[sets[s]]
+        for kk in KNN_K:
+            pred = (votes[:, :kk].mean(1) > 0.5).astype(int)
+            a = balanced_accuracy_score(ys, pred)
+            f = balanced_accuracy_score(ys[in_pair], pred[in_pair])
+            res[(s, kk)] = (a, f, a - f)
+    best = max(KNN_K, key=lambda kk: res[("val", kk)][0])
+    a, f, g = res[("test", best)]
+    return dict(n_neighbors=best, n_train_per_class=n, val_all=res[("val", best)][0],
+                val_floor=res[("val", best)][1], test_all=a, test_floor=f, test_gap=g)
 
 
 def pair_rows(df, pairs, split):
@@ -103,8 +135,11 @@ def main():
     ap.add_argument("--k-from", default=None, help="variant whose chosen k is reused instead of re-selecting")
     ap.add_argument("--n-boot", type=int, default=1000)
     ap.add_argument("--seed", type=int, default=13)
+    ap.add_argument("--run-name", default=None,
+                    help="write to results/<run-name> instead of the variant's folder (robustness runs)")
+    ap.add_argument("--no-knn", action="store_true", help="skip the kNN probe")
     args = ap.parse_args()
-    res_dir = run_dir(args.variant, args.model_tag)
+    res_dir = Path("results") / args.run_name if args.run_name else run_dir(args.variant, args.model_tag)
     pairs_dir = run_dir(args.pairs_from or args.variant, args.model_tag)
     chunks = "data/processed/chunks.parquet" if args.variant == "raw" else         f"data/processed/chunks_{args.variant}.parquet"
     df, emb = load_embeddings(load_usable(chunks), args.variant, args.model_tag)
@@ -113,7 +148,7 @@ def main():
 
     thr_file = pairs_dir / "pair_threshold.json"
     if args.threshold is not None:
-        thr, thr_src = args.threshold, "command line (provisional)"
+        thr, thr_src = args.threshold, "command line"
     elif thr_file.exists():
         thr, thr_src = json.loads(thr_file.read_text())["threshold"], str(thr_file)
     else:
@@ -175,14 +210,30 @@ def main():
     pred_all[test_idx] = model.predict(X[test_idx])
     ci = bootstrap_gap(y[test_idx], pred_all[test_idx], df["issue"].to_numpy()[test_idx],
                        pair_mask[test_idx], args.n_boot, args.seed)
+    c_edge = chosen["C"] in (min(C_GRID), max(C_GRID))
+    if c_edge:
+        print(f"WARNING: chosen C={chosen['C']} is at the edge of the grid {C_GRID}; consider widening it")
+    degenerate = len(np.unique(pred_all[test_idx])) < 2
+    if degenerate:
+        print("WARNING: the chosen classifier predicts a single class on test; its gap and floor are meaningless")
+
+    knn = {}
+    if not args.no_knn:
+        for r in rows:
+            if r["method"] in ("mean-centre", "pairs k=0", chosen["method"]):
+                knn[r["method"]] = knn_check(r["_X"], y, sets, pair_idx, args.seed)
+                print(f"kNN {r['method']:12s} test all={knn[r['method']]['test_all']:.3f} "
+                      f"floor={knn[r['method']]['test_floor']:.3f} gap={knn[r['method']]['test_gap']:+.3f}",
+                      flush=True)
 
     res_dir.mkdir(parents=True, exist_ok=True)
     summary = dict(variant=args.variant, threshold=thr, threshold_source=thr_src,
                    n_pairs={s: int((pairs["split"] == s).sum()) for s in ["train", "val", "test"]},
                    pairs_from=args.pairs_from or args.variant, k_from=args.k_from, model_tag=args.model_tag,
                    floor_target=args.floor_target, chosen=chosen["method"], chosen_k=chosen["k"],
-                   chosen_C=chosen["C"],
-                   test=next(t for t in table if t["method"] == chosen["method"]), test_ci=ci, table=table)
+                   chosen_C=chosen["C"], C_grid=C_GRID, C_at_grid_edge=c_edge, degenerate=degenerate,
+                   test=next(t for t in table if t["method"] == chosen["method"]), test_ci=ci, table=table,
+                   knn=knn)
     (res_dir / "stage1.json").write_text(json.dumps(summary, indent=1, default=float))
 
     # per-chunk test probabilities for the qualitative analysis (which isiXhosa content looks 'English-like')

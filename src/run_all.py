@@ -5,14 +5,24 @@ Usage:
     python src/run_all.py analyse        # after embeddings exist: pairs, classifier, comparison, analyses
     python src/run_all.py analyse --model-tag multilingual-e5-base     # second encoder
 Options:
-    --threshold X   provisional pair-similarity threshold if labels/pairs_labelled.csv is not ready yet
+    --threshold X   provisional LaBSE pair-similarity threshold if labels/pairs_labelled.csv is not
+                    ready yet; other encoders get the threshold that keeps the same share of their
+                    candidates (pairs.py match), because similarity scales differ between encoders
+    --robust-threshold X   LaBSE only: rerun the raw classifier with this stricter pair threshold
+                    (default 0.65) into results/raw_thr<X>, to check the gap does not hinge on weak pairs
+Every run records the Python and package versions in results/environment_<phase>.json.
 """
 import argparse
+import json
+import platform
 import subprocess
 import sys
+from importlib import metadata
 from pathlib import Path
 
 VARIANTS = ["raw", "modern", "modern_asp", "modern_prefix"]
+PACKAGES = ["pandas", "pyarrow", "numpy", "scipy", "scikit-learn", "torch", "transformers",
+            "sentence-transformers", "huggingface_hub", "matplotlib"]
 
 
 def sh(*args):
@@ -20,13 +30,26 @@ def sh(*args):
     subprocess.run([sys.executable, *args], check=True)
 
 
+def record_environment(phase):
+    def version(p):
+        try:
+            return metadata.version(p)
+        except metadata.PackageNotFoundError:
+            return None
+    env = dict(python=sys.version.split()[0], platform=platform.platform(), packages={p: version(p) for p in PACKAGES})
+    Path("results").mkdir(exist_ok=True)
+    Path(f"results/environment_{phase}.json").write_text(json.dumps(env, indent=1))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("phase", choices=["prepare", "analyse"])
     ap.add_argument("--model-tag", default="LaBSE")
     ap.add_argument("--threshold", type=float, default=None)
+    ap.add_argument("--robust-threshold", type=float, default=0.65)
     a = ap.parse_args()
     tag = ["--model-tag", a.model_tag]
+    record_environment(a.phase)
 
     if a.phase == "prepare":
         sh("src/prepare_data.py")
@@ -52,14 +75,25 @@ def main():
     if Path("labels/pairs_labelled.csv").exists():
         sh("src/pairs.py", "tune", *tag)
         thr = []
-    elif a.threshold is not None:
+    elif a.threshold is not None and a.model_tag == "LaBSE":
         thr = ["--threshold", str(a.threshold)]
         print(f"\nNo labelled pairs yet: using provisional threshold {a.threshold}")
+    elif a.threshold is not None:
+        if not Path("results/raw/pair_candidates.parquet").exists():
+            sys.exit("\nRun the LaBSE analysis first: this encoder's provisional threshold is matched to LaBSE's.")
+        sh("src/pairs.py", "match", *tag, "--ref-threshold", str(a.threshold))
+        thr = []  # classify.py reads the matched threshold from pair_threshold.json
+        print(f"\nNo labelled pairs yet: {a.model_tag} threshold matched to LaBSE at {a.threshold}")
     else:
         sh("src/pairs.py", "sheet", *tag)
         sys.exit("\nLabel labels/pairs_to_label.csv (see labels/LABELLING_GUIDE.md), save it as "
                  "labels/pairs_labelled.csv and rerun, or pass --threshold for a provisional run.")
     sh("src/classify.py", "--variant", "raw", *tag, *thr)
+    if a.model_tag == "LaBSE":
+        used = json.loads(Path("results/raw/stage1.json").read_text())["threshold"]
+        if a.robust_threshold > used:
+            sh("src/classify.py", "--variant", "raw", *tag, "--threshold", str(a.robust_threshold),
+               "--run-name", f"raw_thr{a.robust_threshold}")
     for v in variants[1:]:
         sh("src/classify.py", "--variant", v, "--pairs-from", "raw", "--k-from", "raw", *tag, *thr)
     if len(variants) > 1:

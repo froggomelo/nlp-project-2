@@ -8,10 +8,13 @@ Sources (downloaded into data/modern/ by this script if missing):
 Counts are kept per source so the register bias of the list can be inspected (e.g. a word attested
 only in OPUS web/subtitle text). Output: data/modern/lexicon.parquet with columns
 word, vukuzenzele, wikipedia, opus100, total, n_sources.
+The datasets are not pinned to a revision, so results/lexicon/lexicon_sources.json records the
+Hugging Face commit of each dataset at build time, with its token and type counts.
 
 Usage:
     python src/build_lexicon.py
 """
+import json
 import re
 from collections import Counter
 from pathlib import Path
@@ -44,14 +47,31 @@ def texts(name, root):
             yield from df["text"]
 
 
+def dataset_revision(repo):
+    """Current Hugging Face commit of a dataset repo, or None if offline."""
+    try:
+        from huggingface_hub import HfApi
+        return HfApi().dataset_info(repo).sha
+    except Exception:  # noqa: BLE001 - provenance is best effort; the lexicon itself does not need it
+        return None
+
+
 def main(root="data/modern"):
-    counts = {}
+    counts, sources = {}, {}
     for name in SOURCES:
         c = Counter()
         for t in texts(name, root):
             c.update(WORD_RE.findall(str(t).lower()))
         counts[name] = c
+        sources[name] = dict(repo=SOURCES[name][0], revision=dataset_revision(SOURCES[name][0]),
+                             tokens=sum(c.values()), types=len(c))
         print(f"{name}: {sum(c.values()):,} tokens, {len(c):,} types")
+    res = Path("results/lexicon")
+    res.mkdir(parents=True, exist_ok=True)
+    total = sum(s["tokens"] for s in sources.values())
+    (res / "lexicon_sources.json").write_text(json.dumps(
+        dict(sources=sources, total_tokens=total,
+             share_of_tokens={k: s["tokens"] / total for k, s in sources.items()}), indent=1))
     lex = pd.DataFrame(counts).fillna(0).astype(int)
     lex["total"] = lex.sum(axis=1)
     lex["n_sources"] = (lex[list(SOURCES)] > 0).sum(axis=1)

@@ -32,13 +32,14 @@
 
 \section{Introduction}
 \emph{Imvo Zabantsundu}, founded by John Tengo Jabavu in 1884, was the first African-owned and run
-newspaper in South Africa. It was written mainly in isiXhosa, with an English section titled
-\emph{Native Opinion}; in the digitised archive \citep{schoots}, 511 of 517 issues from 1884--1894 carry
-substantial text in both languages. Each issue therefore had one editor writing for two readerships.
+newspaper in South Africa \citep{schoots}. It was written mainly in isiXhosa, but also printed an English
+translation of the editorial and, at times, other English articles, letters and advertisements
+\citep{schoots}. In the text files we use, 511 of 517 issues from 1884--1894 contain at least 1{,}000
+words in each language. Each issue therefore addressed two readerships under one editor.
 Because NLP tools are far stronger for English than for isiXhosa, it is tempting to analyse the English
 half alone, or to ``clean'' the isiXhosa half first. One such step is \emph{spelling modernisation}: the archive writes \emph{Tixo}, \emph{apa} and \emph{umteto} where modern
-isiXhosa writes \emph{Thixo}, \emph{apha} and \emph{umthetho}. Modernisation is usually treated as neutral
-preprocessing. We test that assumption.
+isiXhosa writes \emph{Thixo}, \emph{apha} and \emph{umthetho}. It is tempting to treat modernisation as
+neutral preprocessing. We test that assumption.
 
 \textbf{Research question.} \emph{When Imvo's isiXhosa and English sections from the same issue are
 placed in one multilingual embedding space, how distinguishable is their content, and how does
@@ -47,43 +48,53 @@ modernising the isiXhosa spelling change that answer?}
 \emph{translated-pair floor}, i.e.\ the audiences received different content.
 \textbf{H2:} modernisation lowers the floor (less spelling signal) but leaves the content gap unchanged;
 a significant change in the gap would mean modernisation alters the substantive conclusion.
-\textbf{Contributions:} (i) a language-removal method estimated only from translated pairs, validated on
-synthetic data with a known answer; (ii) a lexicon-gated normaliser with rule ablations; (iii) a
+\textbf{Contributions:} (i) a variant of linear language-subspace removal \citep{lir} that estimates the
+subspace only from translated pairs, so that genuine content differences are not removed with it,
+validated on synthetic data with a known answer; (ii) a lexicon-gated normaliser with rule ablations; (iii) a
 measurement of what modernisation changes, including which names it rewrites.
 
 \section{Background and related work}
-The isiXhosa Intellectual Traditions archive digitised 19th-century isiXhosa newspapers and split pages
-into isiXhosa and English text \citep{schoots}.
+The isiXhosa Intellectual Traditions archive digitised isiXhosa newspapers from 1870--1894. Every page was
+OCR-corrected by first-language isiXhosa speakers, and the text was deliberately not spell-checked,
+because the orthography of the period differs from present-day isiXhosa \citep{schoots}.
 Historical text normalisation maps old spellings to modern ones and is usually evaluated by
 normalisation accuracy or downstream task scores \citep{bollmann}, not by whether it changes the
 conclusions drawn from the text. Multilingual sentence encoders such as LaBSE \citep{labse} embed many
-languages, including isiXhosa, in one space, but their representations still encode language identity;
-removing it, e.g.\ by subtracting each language's mean, is a known technique \citep{libovicky}. We show
-that mean-centring also removes genuine average content differences, which is exactly what we want to
-measure, and replace it with a pair-based estimate. Treating modernisation as a choice that can change
+languages, including isiXhosa, in one space, but their representations still encode language identity.
+It can be removed by subtracting each language's mean \citep{libovicky} or by projecting out a low-rank
+language subspace \citep{lir}; iterative nullspace projection removes a protected attribute in a similar
+way \citep{inlp}. For a linear probe, mean-centring equalises the two languages' means, so it also removes
+genuine average content differences, which is exactly what we want to measure. We therefore estimate the
+language subspace from translated pairs only. Treating modernisation as a choice that can change
 results follows the ``garden of forking paths'' view of analytic flexibility \citep{gelman}.
 
 \section{Method}
 \textbf{Data.} We use the archive's language-split text for 511 of 517 Imvo issues (1884--1894) that
-contain $\geq$1{,}000 words in each language (3.9M isiXhosa, 1.5M English words). We correct only OCR
-artefacts (never spelling), cut pages into 60-word chunks, and flag boilerplate (a chunk is flagged if
+contain $\geq$1{,}000 words in each language (3.9M isiXhosa and 1.5M English words before filtering, close
+to the archive's own counts of 4.0M and 1.5M for all of Imvo \citep{schoots}). We repair only layout and
+OCR artefacts such as words hyphenated across lines (never spelling), cut pages into 60-word chunks, and flag boilerplate (a chunk is flagged if
 $\geq$30\% of its 5-word sequences recur in $\geq$5 issues: adverts, notices, tax lists) and chunks whose
 language does not match their section. This leaves 45{,}465 isiXhosa and 22{,}927 English chunks.
 Issues are split 357/77/77 into train/validation/test, stratified by year, so no issue crosses splits.
 Boilerplate is far more common in the isiXhosa half (29.9\% vs 7.9\%).
 
-\textbf{Modernisation.} From 3.3M tokens of modern isiXhosa (Vukuzenzele \citep{vuk}, isiXhosa
-Wikipedia, OPUS-100 \citep{opus}) we build a word-frequency list $f(\cdot)$. Two rule families can be
-switched on separately: \emph{aspiration} restores unwritten aspiration ($t,p,k,r$ and clicks $c,q,x$
-$\to$ $+h$), trying every combination of eligible positions; \emph{prefix} joins prefixes written apart
-(\emph{e Palamente} $\to$ \emph{ePalamente}). A word $w$ is rewritten to $w'$ only if
-$f(w)\le\tau_o$ and $f(w')\ge\tau_v$. $(\tau_o,\tau_v)$ are tuned on hand-checked validation words to
-maximise $F_{0.5}$, since over-correcting an author's spelling is the costlier error.
+\textbf{Modernisation.} From 3.3M tokens \TBD{verify against build\_lexicon.py output} of modern
+isiXhosa (Vukuzenzele \citep{vuk}, isiXhosa Wikipedia, OPUS-100 \citep{opus}) we build a word-frequency
+list $f(\cdot)$. Two rule families can be switched on separately. \emph{Aspiration} restores unwritten
+aspiration ($t,p,k,r$ and clicks $c,q,x$ $\to$ $+h$), trying every combination of eligible positions:
+a word $w$ is rewritten to its most frequent variant $w'$ only if $f(w)\le\tau_o$ and $f(w')\ge\tau_v$.
+\emph{Prefix} joins prefixes written apart: before a lowercase word only if the joined form has
+$f\ge\tau_v$ and is at least five times as frequent as the bare word; before a capitalised word
+(\emph{e Palamente} $\to$ \emph{ePalamente}) always, without a word-list gate. $(\tau_o,\tau_v)$ are
+chosen to maximise $F_{0.5}$ on hand-checked validation words, since over-correcting an author's
+spelling is the costlier error; until those labels exist we use $(\tau_o,\tau_v){=}(2,5)$
+\TBD{replace with tuned values}.
 
 \textbf{Embedding and pairs.} Chunks are embedded with LaBSE \citep{labse} (and with multilingual-E5
 \citep{e5} as a robustness check). Within each issue, mutual nearest neighbours across the two sections
-are candidate translations; the similarity threshold is the lowest whose precision is $\ge$0.9 on
-hand-labelled validation candidates.
+are candidate translations. We keep candidates with LaBSE similarity $\ge$0.55, a provisional threshold
+\TBD{replace with the lowest threshold whose precision is $\ge$0.9 on hand-labelled validation
+candidates}. E5 similarities fall in a narrow band (0.83--0.87), so E5 needs its own threshold.
 
 \textbf{Removing language, measuring content.} Let $P$ be the translated pairs in training issues.
 Because a pair shares its content, its difference is language:
@@ -97,19 +108,20 @@ is the \emph{floor} (language signal that survives); the content gap is
 \begin{equation}
 \Delta=\BA_{\mathrm{all}}-\BA_{\mathrm{pairs}}.
 \end{equation}
-$k\in\{0,\dots,64\}$ is the smallest value whose validation floor is $\le$0.55, and the regularisation
-$C$ is tuned on validation. For H2, modernised variants reuse the raw run's pairs and $k$, so only the
+$k\in\{0,1,2,4,\dots,64\}$ is the smallest value whose validation floor is $\le$0.55, and the
+regularisation $C\in\{0.01,0.1,1,10\}$ is tuned on validation. For H2, modernised variants reuse the raw run's pairs and $k$, so only the
 text changes. We report differences with paired bootstrap 95\% CIs over test issues ($B{=}1000$).
-Alignment across variants is measured on \emph{embedding-free} true pairs (matched by shared names and
-numbers, then hand-verified), because pairs selected in the raw space would favour raw by construction.
+Alignment across variants is measured on \emph{embedding-free} pairs (mutual best matches on shared names
+and numbers, \TBD{hand-verified}), because pairs selected in the raw space would favour raw by construction.
 
 \textbf{Validation.} On synthetic data with a planted content gap, we compare our method with no
 removal and with mean-centring against an oracle that sees content only.
 
 \section{Results}
-\textbf{The method recovers known gaps.} Without language removal, the classifier separates translated
-pairs perfectly (floor 1.00, gap 0): it detects language, not content. Mean-centring reports a gap of
-0.000 at every effect size. The pair-based method tracks the oracle closely (Fig.~\ref{fig:syn}; at
+\textbf{The method recovers known gaps.} On synthetic data, without language removal the classifier
+separates translated pairs perfectly (floor 1.00, gap 0): it detects language, not content.
+Mean-centring reports a gap of 0.000 at every effect size, as expected for a linear probe once the
+class means are equal. The pair-based method tracks the oracle closely (Fig.~\ref{fig:syn}; at
 $\delta{=}0.4$: 0.097 vs 0.099).
 
 \begin{figure}[t]
@@ -121,13 +133,15 @@ pair-based method recovers the oracle content gap; mean-centring erases it.}
 \end{figure}
 
 \textbf{What modernisation changes.} With provisional thresholds ($\tau_o{=}2,\tau_v{=}5$), the full
-normaliser rewrites 12.4\% of isiXhosa tokens: aspiration 7.8\% (e.g.\ \emph{apa}$\to$\emph{apha},
+normaliser rewrites 12.4\% of the 3.7M alphabetic isiXhosa tokens: aspiration 7.8\% (e.g.\ \emph{apa}$\to$\emph{apha},
 \emph{pakati}$\to$\emph{phakathi}, \emph{ipepa}$\to$\emph{iphepha}) and prefix joining 4.6\%.
-\TBD{Normaliser precision/recall on held-out words, from normalise.py tune.} It rewrites 149 likely
-proper names (capitalised in $\ge$90\% of occurrences; 12{,}966 tokens), including \emph{Xosa}$\to$\emph{Xhosa},
+\TBD{Normaliser precision/recall on held-out words, from normalise.py tune.} The aspiration rule alone
+rewrites 149 likely proper names (capitalised in $\ge$90\% of occurrences; 12{,}966 tokens), including \emph{Xosa}$\to$\emph{Xhosa},
 \emph{Tembu}$\to$\emph{Thembu}, \emph{Mtata}$\to$\emph{Mthatha} and \emph{Tixo}$\to$\emph{Thixo}.
 Table~\ref{tab:tools} shows that modernisation mainly changes vocabulary: 31.5\% of raw word tokens are
 absent from modern text, against 24.5\% after restoring aspiration, while subword fertility barely moves.
+Prefix joining alone raises OOV to 34.2\%, consistent with its joins before capitalised words not
+being checked against the word list.
 
 \begin{table}[t]
 \centering\small
@@ -204,10 +218,13 @@ digitised archive that silently modernises becomes a different historical record
 recommend that analyses of historical African-language text report a \emph{normalisation sensitivity}
 check: run the analysis on raw and normalised text and report both.
 
-\textbf{Limitations.} Translated pairs may over-represent notices and obituaries, so the floor may
-not represent all genres \TBD{genre mix of pairs}. Labelling was done by \TBD{team's isiXhosa reading
-level}; the modern word list is dominated by OPUS-100 web text; OCR noise is uneven across years; and
-we measure differences in content, not editorial intent.
+\textbf{Limitations.} Translated pairs are concentrated in some genres \TBD{genre mix of pairs}, and at
+the provisional threshold 43\% come from 1885--86, so the floor may not represent all genres or years.
+Labelling was done by \TBD{team's isiXhosa reading level}. Prefix joins before capitalised words (4.6\%
+of tokens) are applied without a word-list gate or hand-checking. The modern word list is dominated by
+OPUS-100 web text \TBD{verify against build\_lexicon.py output}. The archive reports no OCR error rate
+\citep{schoots}, so residual OCR noise is unmeasured. We measure differences in content, not editorial
+intent.
 
 \clearpage
 \small
@@ -215,10 +232,12 @@ we measure differences in content, not editorial intent.
 \bibitem[Bollmann(2019)]{bollmann} M.~Bollmann. A large-scale comparison of historical text normalization systems. \emph{NAACL}, 2019.
 \bibitem[Feng et~al.(2022)]{labse} F.~Feng, Y.~Yang, D.~Cer, N.~Arivazhagan, W.~Wang. Language-agnostic BERT sentence embedding. \emph{ACL}, 2022.
 \bibitem[Gelman and Loken(2013)]{gelman} A.~Gelman, E.~Loken. The garden of forking paths. Technical report, Columbia University, 2013.
-\bibitem[Lastrucci et~al.(2023)]{vuk} R.~Lastrucci et~al. Preparing the Vuk'uzenzele and ZA-gov-multilingual South African multilingual corpora. \emph{RAIL}, 2023. \TBD{verify}
+\bibitem[Lastrucci et~al.(2023)]{vuk} R.~Lastrucci, J.~Rajab, M.~Shingange, D.~Njini, V.~Marivate. Preparing the Vuk'uzenzele and ZA-gov-multilingual South African multilingual corpora. \emph{RAIL}, 2023.
 \bibitem[Libovick{\'y} et~al.(2020)]{libovicky} J.~Libovick{\'y}, R.~Rosa, A.~Fraser. On the language neutrality of pre-trained multilingual representations. \emph{Findings of EMNLP}, 2020.
+\bibitem[Ravfogel et~al.(2020)]{inlp} S.~Ravfogel, Y.~Elazar, H.~Gonen, M.~Twiton, Y.~Goldberg. Null it out: Guarding protected attributes by iterative nullspace projection. \emph{ACL}, 2020.
 \bibitem[Schoots et~al.(2023)]{schoots} J.~Schoots, A.~Ngwendu, J.~De~Wet, S.~Muftic. IsiXhosa intellectual traditions digital archive: Digitizing isiXhosa texts from 1870--1914. \emph{RAIL}, 2023.
 \bibitem[Wang et~al.(2024)]{e5} L.~Wang et~al. Multilingual E5 text embeddings: A technical report. arXiv:2402.05672, 2024.
+\bibitem[Yang et~al.(2021)]{lir} Z.~Yang, Y.~Yang, D.~Cer, E.~Darve. A simple and effective method to eliminate the self language bias in multilingual representations. \emph{EMNLP}, 2021.
 \bibitem[Zhang et~al.(2020)]{opus} B.~Zhang, P.~Williams, I.~Titov, R.~Sennrich. Improving massively multilingual neural machine translation and zero-shot translation. \emph{ACL}, 2020.
 \end{thebibliography}
 

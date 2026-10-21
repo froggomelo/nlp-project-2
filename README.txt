@@ -16,47 +16,19 @@ DATA
   Modern isiXhosa corpora (Vukuzenzele, isiXhosa Wikipedia, OPUS-100 en-xh) download automatically
   from Hugging Face in step 1.
 
-STARTING FROM A CLONE OF THIS BRANCH
-  The repository holds code only. The course data and every generated .parquet file are deliberately
-  not committed, so a fresh clone cannot run the Colab notebook until the data is rebuilt:
-
-  1. Clone the branch and install the packages (Python 3.11+):
-       git clone -b project-2 https://github.com/froggomelo/nlp-project-1.git
-       cd nlp-project-1
-       python -m pip install -r requirements.txt
-
-  2. Get TxtLangFiles1870-1894_TB.zip from Moodle and extract it into data/raw/ so that this file
-     exists:
-       data/raw/TxtLangFiles1870-1894_TB/XhTxt/IMVO_1884-11-03_p001.txt
-     Windows "Extract All" sometimes creates a doubled folder
-     (data/raw/TxtLangFiles1870-1894_TB/TxtLangFiles1870-1894_TB/); if so, move the inner folder up one
-     level. The __MACOSX folder can be deleted.
-
-  3. Build the processed data (~4 min; downloads the modern isiXhosa corpora on the first run):
-       python src/run_all.py prepare
-     Check data/processed/data_card.md: it must say "kept (>= 1000 words in both languages): 511".
-     If it does, your data matches the rest of the team's.
-
-  4. Build the Colab bundle:
-       python src/make_colab_bundle.py
-     It should list data/processed/chunks.parquet and data/processed/normaliser_candidates.parquet
-     and report a size of about 26-27 MB. Upload colab/colab_bundle.zip in the notebook (step 3 below).
-
-  Every step in "prepare" is deterministic (seed 13), so rerunning it is safe: it overwrites its
-  outputs with identical files and never touches labels/ or data/embeddings/. The one difference
-  between machines can come from the modern word list, which is downloaded from Hugging Face at build
-  time; if the team needs identical normaliser output, share one colab_bundle.zip instead of each
-  person rebuilding it. Do NOT rerun "normalise.py sheet" or "pairs.py sheet" once labelling has
-  started: they overwrite the blank labelling sheets.
+TEAM NOTES
+  Rebuilding from a git clone, git workflow, labelling order and troubleshooting: docs/HANDOVER.txt
 
 PIPELINE (run from the project root)
   1. Text preparation (CPU, ~5 min):
        python src/run_all.py prepare
      = prepare_data.py   clean, chunk (60 words), flag boilerplate, split by issue (70/15/15 by year)
-       build_lexicon.py  modern isiXhosa word list with per-source counts
+       build_lexicon.py  modern isiXhosa word list with per-source counts; records each dataset's
+                         Hugging Face revision and token counts in results/lexicon/lexicon_sources.json
        normalise.py      candidate rewrites; tune (if labels exist); apply all / asp / prefix variants
        tool_metrics.py   tokens per word (LaBSE, XLM-R) and out-of-vocabulary rate per variant
-       synthetic_check.py  validates the language-removal method on data with a known answer
+       synthetic_check.py  validates the language-removal method on data with a known answer, with clean
+                           pairs and with 40% false pairs (as in the real candidates)
 
   2. Hand-labelling (people, ~3-4 h in total; see labels/LABELLING_GUIDE.md):
        python src/normalise.py sheet         -> labels/normaliser_to_label.csv  (save as normaliser_labelled.csv)
@@ -79,97 +51,29 @@ PIPELINE (run from the project root)
        python src/run_all.py analyse --model-tag multilingual-e5-base
      = pairs.py        mutual-nearest-neighbour pairs per issue; threshold tuned on labelled pairs
        classify.py     section classifier with the language subspace (from translated pairs) removed;
-                       k chosen so the validation pair floor is at chance; modern variants reuse raw's
-                       reference pairs and k
-       compare.py      raw vs modern vs ablations: all / floor / gap, alignment, paired bootstrap CIs
+                       k chosen so the validation pair floor is at chance, C tuned on validation;
+                       modern variants reuse raw's reference pairs and k; also reports the gap for a
+                       kNN probe (a linear probe cannot see differences that mean-centring leaves)
+       compare.py      raw vs modern vs ablations: all / floor / gap, alignment, paired bootstrap CIs,
+                       and an H2 verdict (equivalent / different / inconclusive) against a +/-0.02 margin
        qualitative.py  topic clusters, isiXhosa-only topics, per-issue divergence vs permutation baseline
-     Without labels yet, add --threshold 0.55 for a provisional run.
+     Without labels yet, add --threshold 0.55 for a provisional run. That threshold applies to LaBSE;
+     the second encoder gets the threshold that keeps the same share of its candidates (pairs.py
+     match), because its similarities sit in a different range. The LaBSE run also repeats the raw
+     classifier at a stricter threshold (--robust-threshold, default 0.65) into results/raw_thr0.65.
+     Each run records the Python and package versions in results/environment_<phase>.json.
 
   Check that everything runs without a GPU (stand-in embeddings; numbers meaningless):
        python src/smoke_test.py   then   python src/smoke_test.py --clean
-
-HANDOVER: COMMAND REFERENCE
-  Run every command from the project root (the folder containing README.txt and src/).
-
-  Git (team workflow)
-    git pull                                   start of every session: get teammates' changes
-    git status                                 see what you changed
-    git add <file> ...                         stage code, labels/*.csv, report/*; never data/ or *.parquet
-    git commit -m "What changed and why"
-    git push origin project-2
-    The .gitignore already keeps data, embeddings, parquet files and zips out. Never force-push:
-    it can delete teammates' work. Commit finished label files (labels/*_labelled.csv) so everyone
-    uses the same labels.
-
-  Checks
-    python --version                           must be 3.11 or newer
-    python -m pip install -r requirements.txt
-    python src/smoke_test.py                   whole pipeline on stand-in embeddings (~5 min, needs
-                                               "prepare" first); prints SMOKE TEST PASSED
-    python src/smoke_test.py --clean           remove its FAKE outputs afterwards
-
-  Text preparation (CPU)
-    python src/run_all.py prepare              all of the below, in order (~4 min)
-    python src/prepare_data.py                 data/processed/chunks.parquet, splits.json, data_card.md
-    python src/build_lexicon.py                data/modern/lexicon.parquet (downloads corpora)
-    python src/normalise.py candidates         data/processed/normaliser_candidates.parquet
-    python src/normalise.py apply --rules all      -> chunks_modern.parquet
-    python src/normalise.py apply --rules asp      -> chunks_modern_asp.parquet
-    python src/normalise.py apply --rules prefix   -> chunks_modern_prefix.parquet
-    python src/tool_metrics.py                 results/tool_metrics/
-    python src/synthetic_check.py              results/synthetic/
-
-  Labelling (people; see labels/LABELLING_GUIDE.md)
-    python src/normalise.py sheet              ONCE -> labels/normaliser_to_label.csv
-                                               fill in, save as labels/normaliser_labelled.csv
-    python src/normalise.py tune               thresholds -> results/normaliser/threshold.json
-    python src/pairs.py sheet                  ONCE, after raw embeddings exist -> labels/pairs_to_label.csv
-                                               fill in, save as labels/pairs_labelled.csv
-    python src/pairs.py tune                   pair threshold (+ Cohen's kappa if label_2 is filled)
-
-  Embeddings (GPU, browser Colab; do not run LaBSE on a laptop with < 6 GB free RAM)
-    python src/make_colab_bundle.py            colab/colab_bundle.zip (includes labels and the normaliser
-                                               threshold if they exist)
-    In Colab: upload colab/embed_on_colab.ipynb, Runtime -> T4 GPU, Run all, upload the bundle.
-    Unzip the downloaded embeddings_all.zip into data/embeddings/; it should then contain
-    raw_LaBSE.npy, modern_LaBSE.npy, modern_asp_LaBSE.npy, modern_prefix_LaBSE.npy,
-    raw_multilingual-e5-base.npy, modern_multilingual-e5-base.npy and the *_ids.txt files.
-
-  Analysis (CPU)
-    python src/run_all.py analyse                          LaBSE: pairs, classifier, compare, qualitative
-    python src/run_all.py analyse --threshold 0.55         provisional run before pair labels exist
-    python src/run_all.py analyse --model-tag multilingual-e5-base     second encoder
-    Results for the report: results/compare/compare.md and fig_compare.png, results/raw/stage1.json,
-    results/raw/qualitative.md, plus the tool_metrics, synthetic and normaliser folders.
-
-  What to rerun when something changes
-    normaliser labels change   normalise.py tune -> the three "apply" commands -> make_colab_bundle.py
-                               -> re-embed the modern variants in Colab -> run_all.py analyse
-    pair labels change         run_all.py analyse (pairs.py tune runs inside it); no re-embedding
-    code in classify/compare/qualitative changes   run_all.py analyse only
-    raw data or prepare_data.py changes            everything, including all embeddings
-
-  Do not
-    - rerun "normalise.py sheet" or "pairs.py sheet" once labelling has started (they overwrite the sheet)
-    - change the seed (13) or edit data/processed/splits.json (it fixes the train/val/test issues)
-    - mix embeddings from different bundles: every *.npy must come from the same chunks files
-    - commit data/, *.parquet, *.npy or *.zip
-
-  Troubleshooting
-    "too few reference pairs"          threshold too high or too few labelled pairs: check
-                                       results/raw/pair_threshold.json and the labels
-    "embeddings incomplete"            an embedding run stopped early: rerun that Colab cell
-    "does not match the chunks on disk"   embeddings built from a different bundle than the chunks
-                                       files on disk: rebuild the bundle and re-embed
-    run stopped for low memory         close other apps, or run that step in Colab
-    FileNotFoundError on *.parquet     run "python src/run_all.py prepare" first
 
 OUTPUTS
   data/processed/data_card.md            corpus statistics
   results/normaliser/                    thresholds, what changed, likely-name rewrites
   results/tool_metrics/                  fertility and OOV per variant and year
-  results/synthetic/fig_synthetic.png    method validation
+  results/lexicon/lexicon_sources.json   modern corpora: revisions, token counts, share of the word list
+  results/synthetic/                     method validation: fig_synthetic.png, fig_synthetic_noisy.png
   results/raw/                           Stage 1: stage1.json, fig_k_curve.png, qualitative.md, fig_clusters.png
+  results/raw_thr0.65/                   Stage 1 robustness: the raw classifier with stricter pairs
   results/compare/                       Stage 3: compare.md, fig_compare.png (central figure)
   results/*__multilingual-e5-base/       the same for the second encoder
 
@@ -182,5 +86,51 @@ KEY DESIGN DECISIONS
     reported for comparison because it also removes genuine content differences (synthetic_check.py).
   - Only accuracy above the translated-pair floor counts as a content difference.
   - The normaliser rewrites a word only if the original is unattested in modern text and the rewrite is
-    attested; thresholds favour precision (F0.5) because over-correcting authors' spelling is the costly error.
+    attested, and joins a prefix only if the joined form is attested; thresholds favour precision (F0.5)
+    because over-correcting authors' spelling is the costly error. All three rule families are hand-checked.
   - Alignment across spelling variants is measured on embedding-free (anchor) pairs to avoid selection bias.
+
+CHANGES ON 21 OCTOBER 2026 (team note: delete this section before submission)
+  What changed
+    1. classify.py      C grid widened to 0.01-1000; warns if the chosen C sits at the edge of the grid.
+    2. pairs.py match   the second encoder (E5) gets its own provisional pair threshold: the one that
+                        keeps the same share of its candidates as LaBSE keeps at 0.55. E5 similarities
+                        all lie between 0.83 and 0.87, so a threshold of 0.55 filtered nothing.
+    3. run_all.py       the LaBSE run repeats the raw classifier with stricter pairs (0.65) into
+                        results/raw_thr0.65/, to check the gap does not depend on weak pairs.
+    4. normalise.py     prefix joins before capitalised words must pass the word-list check (the joined
+                        form must be attested), and they are now on the labelling sheet and in tuning.
+                        Before, they were applied to every match without a check (4.6% of tokens).
+    5. classify.py      also reports the gap for a kNN probe (no removal, mean-centring, chosen k):
+                        a linear probe cannot see differences that mean-centring leaves.
+    6. synthetic_check.py  second condition with 40% false pairs, as in the real candidates
+                        (results/synthetic/fig_synthetic_noisy.png).
+    7. compare.py       H2 verdict: equivalent / different / inconclusive, from the 90% CI of the gap
+                        change against a +/-0.02 margin; "invalid" if a classifier predicts one class.
+    8. Provenance       package versions -> results/environment_<phase>.json; Hugging Face revisions
+                        and token counts of the modern corpora -> results/lexicon/lexicon_sources.json.
+                        Team notes moved from this README to docs/HANDOVER.txt.
+
+  Bug fixed (it predates these changes)
+    In the full "modern" variant, aspiration ran before prefix joining, so a prefix before a word that
+    aspiration had rewritten was never joined ("ku Rulumente" became "ku Rhulumente", not
+    "kuRhulumente"). Join decisions are now made on the raw text, before aspiration.
+
+  Testing
+    Every stage was run end to end on a small fake corpus (prepare, normaliser, synthetic check, pairs,
+    classifier, robustness run, matched E5 threshold, compare, qualitative). This shows the code runs;
+    it says nothing about the real results.
+    The synthetic check does not use the data, so its output in results/synthetic/ is final. Clean
+    pairs: unchanged (pairs 0.097 vs oracle 0.099 at delta 0.4). With 40% false pairs the pair method
+    still finds a positive gap but underestimates it (0.045 vs 0.059), and mean-centring still reports
+    0: noisy pairs make the H1 estimate cautious, not inflated.
+
+  Next steps, in order (whoever has the data)
+    1. python src/run_all.py prepare        rebuilds the normaliser candidates under the new check
+    2. python src/normalise.py sheet        regenerates the labelling sheet, now with prefix joins before
+                                            names (the current sheet is blank, so nothing is lost)
+    3. python src/make_colab_bundle.py, then Run all on Colab: modern and modern_prefix must be
+       re-embedded because their text changed
+    4. Label pairs and normaliser words, then one final python src/run_all.py analyse
+    Expect the modern-variant numbers to move (the prefix rule now rewrites far fewer tokens); the raw
+    H1 result is unaffected by the normaliser change.

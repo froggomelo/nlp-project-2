@@ -19,9 +19,15 @@ alignment, and the reference pairs only for the (larger-sample) floor.
 
 Reading the result (H2): if floor and all move together and the gap is unchanged, modernising only
 removed spelling signal; if the gap moves, modernising changed the measured content difference.
+"Unchanged" is an equivalence claim, so it is tested against a margin fixed in advance (--margin,
+default 0.02 balanced accuracy) with two one-sided tests at alpha = 0.05, i.e. the 90% paired
+bootstrap CI of the gap change must lie inside +/- margin:
+  equivalent      90% CI inside +/- margin
+  different       95% CI excludes 0 and the 90% CI is not inside the margin
+  inconclusive    neither (more test issues would be needed to decide)
 
 Usage:
-    python src/compare.py --variants raw modern modern_asp modern_prefix
+    python src/compare.py --variants raw modern modern_asp modern_prefix [--margin 0.02]
 """
 import argparse
 import json
@@ -61,9 +67,18 @@ def stats(pred_df, mask_issues=None):
     return a, f, a - f
 
 
+def h2_verdict(ci90, ci95, margin):
+    if -margin < ci90[0] and ci90[1] < margin:
+        return "equivalent"
+    if ci95[0] > 0 or ci95[1] < 0:
+        return "different"
+    return "inconclusive"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--variants", nargs="+", default=["raw", "modern", "modern_asp", "modern_prefix"])
+    ap.add_argument("--margin", type=float, default=0.02, help="equivalence margin for the gap change (H2)")
     ap.add_argument("--model-tag", default="LaBSE")
     ap.add_argument("--n-boot", type=int, default=1000)
     ap.add_argument("--seed", type=int, default=13)
@@ -124,16 +139,28 @@ def main():
             table.loc[table["variant"] == v, f"d_{n}"] = table.loc[table["variant"] == v, n].values[0] - \
                 table.loc[table["variant"] == base, n].values[0]
             table.loc[table["variant"] == v, f"d_{n}_ci"] = f"[{lo[j]:+.3f}, {hi[j]:+.3f}]"
+        lo90, hi90 = np.nanpercentile(b[:, 2], [5, 95])
+        j = names.index("gap")
+        table.loc[table["variant"] == v, "d_gap_ci90"] = f"[{lo90:+.3f}, {hi90:+.3f}]"
+        if v == base:
+            verdict = "--"
+        elif s1[v].get("degenerate") or s1[base].get("degenerate"):
+            verdict = "invalid (constant classifier)"
+        else:
+            verdict = h2_verdict((lo90, hi90), (lo[j], hi[j]), args.margin)
+        table.loc[table["variant"] == v, "h2"] = verdict
 
     out = run_dir("compare", tag)
     out.mkdir(parents=True, exist_ok=True)
     table.to_csv(out / "compare.csv", index=False)
     (out / "compare.json").write_text(json.dumps(dict(base=base, threshold=thr, n_ref_pairs=len(ref),
-                                                      table=table.to_dict("records")), indent=1, default=float))
+                                                      margin=args.margin, table=table.to_dict("records")),
+                                                 indent=1, default=float))
     with open(out / "compare.md", "w", encoding="utf-8") as fh:
-        fh.write(f"Reference pairs: {len(ref)} (val+test, sim >= {thr} in '{base}')\n\n")
-        cols = ["variant", "all", "floor", "gap", "d_gap", "d_gap_ci", "d_floor", "d_floor_ci",
-                "p_at_1_lab", "sim_lab", "pairs_found"] if lab is not None else                ["variant", "all", "floor", "gap", "d_gap", "d_gap_ci", "d_floor", "d_floor_ci", "pairs_found"]
+        fh.write(f"Reference pairs: {len(ref)} (val+test, sim >= {thr} in '{base}'). "
+                 f"H2 equivalence margin: +/-{args.margin} BA on the gap change (90% CI).\n\n")
+        cols = ["variant", "all", "floor", "gap", "d_gap", "d_gap_ci", "d_gap_ci90", "h2", "d_floor",
+                "d_floor_ci"] + (["p_at_1_lab", "sim_lab"] if lab is not None else []) + ["pairs_found"]
         fh.write(table[cols].to_markdown(index=False, floatfmt=".3f"))
 
     # central figure

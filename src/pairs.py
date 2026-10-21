@@ -15,6 +15,10 @@ The labelling sheet mixes two sources so the labels can serve two purposes:
           -> an encoder-independent set of true pairs, so alignment can be compared across spelling
              variants without favouring the variant the candidates were selected in
     python src/pairs.py tune                  # pick threshold from labelled val pairs, report test P/R
+    python src/pairs.py match --model-tag multilingual-e5-base --ref-threshold 0.55
+        # provisional threshold for another encoder before labels exist: keep the same share of its
+        # candidates as LaBSE keeps at --ref-threshold. Similarity scales differ between encoders
+        # (E5 cosine similarities sit in a narrow band near 0.85), so one number cannot serve both.
 """
 import argparse
 import json
@@ -156,13 +160,14 @@ def tune(cand_path, labels_path, min_precision, df, emb, model_tag):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("mode", choices=["candidates", "sheet", "tune"])
+    ap.add_argument("mode", choices=["candidates", "sheet", "tune", "match"])
     ap.add_argument("--variant", default="raw")
     ap.add_argument("--model-tag", default="LaBSE")
     ap.add_argument("--n", type=int, default=300)
     ap.add_argument("--seed", type=int, default=13)
     ap.add_argument("--labels", default="labels/pairs_labelled.csv")
     ap.add_argument("--min-precision", type=float, default=0.9)
+    ap.add_argument("--ref-threshold", type=float, default=0.55, help="LaBSE threshold to match (match mode)")
     args = ap.parse_args()
     res_dir = run_dir(args.variant, args.model_tag)
     res_dir.mkdir(parents=True, exist_ok=True)
@@ -185,6 +190,16 @@ def main():
         out = Path("labels/pairs_to_label.csv")
         sheet.to_csv(out, index=False, encoding="utf-8-sig")
         print(f"wrote {len(sheet)} pairs to {out} ({sheet['source'].value_counts().to_dict()})")
+    elif args.mode == "match":
+        ref = pd.read_parquet(run_dir("raw", "LaBSE") / "pair_candidates.parquet")
+        share = float((ref["sim"] >= args.ref_threshold).mean())
+        cand = pd.read_parquet(cand_path)
+        thr = float(cand["sim"].quantile(1 - share))
+        res = {"threshold": thr, "kappa": None, "share_kept": share,
+               "rule": f"provisional: keeps the same share of candidates ({share:.1%}) as LaBSE at "
+                       f"{args.ref_threshold}; replace by `pairs.py tune` once pairs are labelled"}
+        (res_dir / "pair_threshold.json").write_text(json.dumps(res, indent=1))
+        print(res)
     else:
         df, emb = load_embeddings(load_usable(), "raw", args.model_tag)
         res = tune(cand_path, args.labels, args.min_precision, df, emb, args.model_tag)

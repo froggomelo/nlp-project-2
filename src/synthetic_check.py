@@ -4,6 +4,10 @@ Each synthetic 'issue' has isiXhosa and English chunks. A chunk's embedding is
     content (a topic centroid + noise)  +  language (a direction inside a 3-d language subspace, +/-)
 A fraction of English chunks are translations: they copy the content of an isiXhosa chunk.
 The audience effect delta shifts the topic distribution of isiXhosa chunks away from English ones.
+Real candidate pairs are noisy (at LaBSE similarity 0.55-0.60 only ~60% share a name or number), so
+each delta is also run with FALSE_FRAC of the recorded pairs being false: the English chunk keeps its
+own content. False pairs enter both the language-subspace estimate and the floor, as they would in
+the real data. The clean condition (false_frac = 0) draws the same random numbers as before.
 
 For each delta we compare the gap (all-chunk accuracy minus translated-pair floor) found by:
   none          no language removal                         (expected: floor ~1, gap ~0: trap 1)
@@ -13,6 +17,8 @@ against the oracle gap from a classifier that sees the content vectors only.
 
 Usage:
     python src/synthetic_check.py
+Outputs: results/synthetic/fig_synthetic.png (clean pairs), fig_synthetic_noisy.png (40% false pairs),
+synthetic.json and synthetic_summary.csv (both conditions).
 """
 import json
 from pathlib import Path
@@ -32,9 +38,10 @@ N_XH, N_EN, TRANSLATED = 60, 30, 0.3
 DELTAS = [0.0, 0.1, 0.2, 0.4]
 SEEDS = [0, 1, 2, 3, 4]
 K_GRID = [1, 2, 4, 8]
+FALSE_FRACS = [0.0, 0.4]
 
 
-def make_world(delta, seed):
+def make_world(delta, seed, false_frac=0.0):
     rng = np.random.default_rng(seed)
     cent = rng.standard_normal((TOPICS, D))
     cent /= np.linalg.norm(cent, axis=1, keepdims=True)
@@ -50,7 +57,9 @@ def make_world(delta, seed):
             ce = cent[rng.choice(TOPICS, N_EN, p=p_en)] + 0.6 * rng.standard_normal((N_EN, D)) / np.sqrt(D)
             n_tr = int(TRANSLATED * N_EN)
             src = rng.choice(N_XH, n_tr, replace=False)
-            ce[:n_tr] = cx[src] + 0.05 * rng.standard_normal((n_tr, D)) / np.sqrt(D)
+            copy = cx[src] + 0.05 * rng.standard_normal((n_tr, D)) / np.sqrt(D)
+            n_false = round(false_frac * n_tr)  # recorded as pairs, but the English keeps its own content
+            ce[n_false:n_tr] = copy[n_false:]
             px = np.full(N_XH, -1)
             pe = np.full(N_EN, -1)
             px[src] = np.arange(pid, pid + n_tr)
@@ -80,8 +89,8 @@ def pair_index(d):
     return np.array([xh[k] for k in keys]), np.array([en[k] for k in keys])
 
 
-def run(delta, seed):
-    d = make_world(delta, seed)
+def run(delta, seed, false_frac=0.0):
+    d = make_world(delta, seed, false_frac)
     X = {s: d[s]["C"] + d[s]["L"] for s in d}
     out = {}
     # oracle: content only
@@ -111,32 +120,37 @@ def run(delta, seed):
 
 def main():
     res = []
-    for delta in DELTAS:
-        for seed in SEEDS:
-            r = run(delta, seed)
-            res.append(dict(delta=delta, seed=seed, k=r.pop("pairs_k"),
-                            **{f"{m}_{n}": v for m, vals in r.items() for n, v in zip(["all", "floor", "gap"], vals)}))
-            print(f"delta={delta} seed={seed} " + " ".join(f"{m}: gap={r[m][2]:+.3f} floor={r[m][1]:.2f}"
-                                                          for m in r), flush=True)
+    for false_frac in FALSE_FRACS:
+        for delta in DELTAS:
+            for seed in SEEDS:
+                r = run(delta, seed, false_frac)
+                res.append(dict(false_frac=false_frac, delta=delta, seed=seed, k=r.pop("pairs_k"),
+                                **{f"{m}_{n}": v for m, vals in r.items()
+                                   for n, v in zip(["all", "floor", "gap"], vals)}))
+                print(f"false={false_frac} delta={delta} seed={seed} " +
+                      " ".join(f"{m}: gap={r[m][2]:+.3f} floor={r[m][1]:.2f}" for m in r), flush=True)
     out = Path("results/synthetic")
     out.mkdir(parents=True, exist_ok=True)
     (out / "synthetic.json").write_text(json.dumps(res, indent=1, default=float))
 
     import pandas as pd
     t = pd.DataFrame(res)
-    agg = t.groupby("delta").agg(["mean", "std"])
     methods = ["oracle", "none", "mean-centre", "pairs"]
-    fig, ax = plt.subplots(figsize=(4.6, 3.1))
-    for m, style in zip(methods, ["k-", "x:", "s--", "o-"]):
-        ax.errorbar(agg.index, agg[(f"{m}_gap", "mean")], yerr=agg[(f"{m}_gap", "std")], fmt=style, capsize=3,
-                    label=m)
-    ax.axhline(0, color="grey", lw=0.7)
-    ax.set_xlabel(r"planted audience effect $\delta$")
-    ax.set_ylabel("test gap (all - pair floor)")
-    ax.set_title("Synthetic check: which method recovers the true gap?", fontsize=9)
-    ax.legend(frameon=False, fontsize=8)
-    fig.tight_layout()
-    fig.savefig(out / "fig_synthetic.png", dpi=200)
+    for false_frac, name in zip(FALSE_FRACS, ["fig_synthetic.png", "fig_synthetic_noisy.png"]):
+        agg = t[t["false_frac"] == false_frac].drop(columns="false_frac").groupby("delta").agg(["mean", "std"])
+        fig, ax = plt.subplots(figsize=(4.6, 3.1))
+        for m, style in zip(methods, ["k-", "x:", "s--", "o-"]):
+            ax.errorbar(agg.index, agg[(f"{m}_gap", "mean")], yerr=agg[(f"{m}_gap", "std")], fmt=style,
+                        capsize=3, label=m)
+        ax.axhline(0, color="grey", lw=0.7)
+        ax.set_xlabel(r"planted audience effect $\delta$")
+        ax.set_ylabel("test gap (all - pair floor)")
+        title = "Synthetic check: which method recovers the true gap?"
+        ax.set_title(title if false_frac == 0 else f"{title}\n({false_frac:.0%} of pairs false)", fontsize=9)
+        ax.legend(frameon=False, fontsize=8)
+        fig.tight_layout()
+        fig.savefig(out / name, dpi=200)
+    agg = t.groupby(["false_frac", "delta"]).agg(["mean"])
     summary = agg[[(f"{m}_gap", "mean") for m in methods] + [(f"{m}_floor", "mean") for m in methods]].round(3)
     summary.to_csv(out / "synthetic_summary.csv")
     print(summary.to_string())

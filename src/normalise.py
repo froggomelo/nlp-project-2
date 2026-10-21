@@ -4,14 +4,15 @@ Two rule families, each switchable for the ablation:
   asp     restore unwritten aspiration: t->th, p->ph, k->kh, r->rh and the clicks c->ch, q->qh, x->xh
           (e.g. Tixo->Thixo, apa->apha, tetayo->thethayo). Every combination of eligible positions is
           generated; the most frequent variant in the modern word list wins.
-  prefix  join prefixes written as separate words: before a capitalised word always
-          (e Palamente -> ePalamente, u Klass -> uKlass; English titles such as Mr. are left alone),
-          before a lowercase word only if the joined form is attested in the modern word list.
+  prefix  join prefixes written as separate words (e Palamente -> ePalamente; English titles such as
+          Mr. are left alone). Before a capitalised word, the joined form must be attested in the
+          modern word list (frequency >= tau_v); before a lowercase word, it must also be at least
+          five times as frequent as the bare word.
 
-Lexicon gate: a word is rewritten only if the original is (nearly) unattested in modern text
-(frequency <= tau_o) and the rewrite is attested (frequency >= tau_v). tau_o and tau_v are tuned
+Lexicon gate: an aspiration rewrite is made only if the original is (nearly) unattested in modern
+text (frequency <= tau_o) and the rewrite is attested (frequency >= tau_v). tau_o and tau_v are tuned
 on hand-checked validation words, favouring precision (F0.5) because over-correcting an author's
-own spelling is the costly error.
+own spelling is the costly error. All three rule families appear on the hand-checking sheet.
 
 Modes:
     python src/normalise.py candidates              # per-word-type rewrite candidates
@@ -42,7 +43,8 @@ PREFIX_COMMON = ["e", "u", "i", "ku", "kwi", "nge", "ngo", "nga", "ne", "no", "n
 TITLES = r"(?:Mr|Mrs|Messrs|Rev|Dr|Sir|Miss|Capt|Col|Hon)\b"
 WORD_RE = re.compile(r"[A-Za-z]+")
 _PROPER_ALT = sorted(set(PREFIX_PROPER) | {p.capitalize() for p in PREFIX_PROPER}, key=len, reverse=True)
-PROPER_RE = re.compile(r"\b(" + "|".join(_PROPER_ALT) + r")\s+(?!" + TITLES + r")(?=[A-Z][a-z])")
+# group 1 = prefix (consumed with the space), group 2 = the following name (lookahead, left in place)
+PROPER_RE = re.compile(r"\b(" + "|".join(_PROPER_ALT) + r")\s+(?!" + TITLES + r")(?=([A-Z][a-z]+))")
 COMMON_RE = re.compile(r"\b(" + "|".join(sorted(PREFIX_COMMON, key=len, reverse=True)) + r")\s+([a-z]{3,})\b")
 CAND_PATH = Path("data/processed/normaliser_candidates.parquet")
 THR_PATH = Path("results/normaliser/threshold.json")
@@ -76,7 +78,7 @@ def build_candidates(texts, lex):
     proper, common = Counter(), Counter()
     for t in texts:
         hist.update(w.lower() for w in WORD_RE.findall(t))
-        proper.update((p.lower(), "") for p in PROPER_RE.findall(t))
+        proper.update((p.lower(), name) for p, name in PROPER_RE.findall(t))
         common.update((p, w) for p, w in COMMON_RE.findall(t))
     rows = []
     for w, n in hist.items():
@@ -88,13 +90,21 @@ def build_candidates(texts, lex):
         rows.append(dict(rule="asp", word=w, proposed=best, hist_count=n, orig_freq=of,
                          prop_freq=lex.get(best, 0) if best else 0))
     for (p, w), n in common.items():
-        joined = p + w
-        rows.append(dict(rule="prefix_common", word=f"{p} {w}", proposed=joined, hist_count=n,
-                         orig_freq=lex.get(w, 0), prop_freq=lex.get(joined, 0)))
-    for (p, _), n in proper.items():
-        rows.append(dict(rule="prefix_proper", word=f"{p} <Name>", proposed=f"{p}<Name>", hist_count=n,
-                         orig_freq=0, prop_freq=0))
+        rows.append(dict(rule="prefix_common", word=f"{p} {w}", proposed=p + w, hist_count=n,
+                         orig_freq=best_freq("", w, lex), prop_freq=best_freq(p, w, lex)))
+    for (p, name), n in proper.items():
+        rows.append(dict(rule="prefix_proper", word=f"{p} {name}", proposed=p + name, hist_count=n,
+                         orig_freq=best_freq("", name, lex), prop_freq=best_freq(p, name, lex)))
     return pd.DataFrame(rows)
+
+
+def best_freq(prefix, word, lex):
+    """Modern frequency of prefix+word in its raw or any aspirated spelling (the list is lowercase).
+
+    Whether modern text joins a prefix to a word does not depend on how the word itself is spelt, so
+    'ku Rulumente' counts as attested if 'kurhulumente' is."""
+    w = word.lower()
+    return max(lex.get(prefix + f, 0) for f in [w] + aspiration_variants(w))
 
 
 def accepted(cand, tau_o, tau_v):
@@ -102,14 +112,17 @@ def accepted(cand, tau_o, tau_v):
           (cand["proposed"] != "")
     com = (cand["rule"] == "prefix_common") & (cand["prop_freq"] >= tau_v) & \
           (cand["prop_freq"] > 5 * cand["orig_freq"])
-    return asp | com | (cand["rule"] == "prefix_proper")
+    # no ratio test before names: the bare name is usually common in modern text in its own right
+    prop = (cand["rule"] == "prefix_proper") & (cand["prop_freq"] >= tau_v)
+    return asp | com | prop
 
 
 def make_maps(cand, tau_o, tau_v):
     acc = cand[accepted(cand, tau_o, tau_v)]
     asp_map = dict(zip(acc.loc[acc["rule"] == "asp", "word"], acc.loc[acc["rule"] == "asp", "proposed"]))
     common_set = {tuple(w.split(" ")) for w in acc.loc[acc["rule"] == "prefix_common", "word"]}
-    return asp_map, common_set
+    proper_set = {tuple(w.split(" ")) for w in acc.loc[acc["rule"] == "prefix_proper", "word"]}
+    return asp_map, common_set, proper_set
 
 
 def restore_case(orig, new):
@@ -120,8 +133,28 @@ def restore_case(orig, new):
     return new
 
 
-def normalise_text(text, rules, asp_map, common_set, log):
-    """Aspiration first (on separate words), then prefix joining. `log` collects (rule, old, new)."""
+JOIN = "\x00"  # marks a decided prefix join; keeps the two words apart until aspiration has run
+
+
+def normalise_text(text, rules, asp_map, common_set, proper_set, log):
+    """Prefix joins are decided on the raw spelling (as the candidates were), then aspiration is
+    restored word by word, then the joins are made. `log` collects (rule, old, new)."""
+    if "prefix" in rules:
+        def proper_sub(m):
+            p, name = m.group(1), m.group(2)
+            if (p.lower(), name) in proper_set:
+                log[("prefix_proper", f"{p} {name}", p + name)] += 1
+                return p + JOIN
+            return m.group(0)
+        text = PROPER_RE.sub(proper_sub, text)
+
+        def common_sub(m):
+            p, w = m.group(1), m.group(2)
+            if (p, w) in common_set:
+                log[("prefix_common", f"{p} {w}", p + w)] += 1
+                return p + JOIN + w
+            return m.group(0)
+        text = COMMON_RE.sub(common_sub, text)
     if "asp" in rules:
         def asp_sub(m):
             w = m.group(0)
@@ -132,20 +165,7 @@ def normalise_text(text, rules, asp_map, common_set, log):
             log[("asp", w, new)] += 1
             return new
         text = WORD_RE.sub(asp_sub, text)
-    if "prefix" in rules:
-        def proper_sub(m):
-            log[("prefix_proper", m.group(1), "")] += 1
-            return m.group(1)
-        text = PROPER_RE.sub(proper_sub, text)
-
-        def common_sub(m):
-            p, w = m.group(1), m.group(2)
-            if (p, w) in common_set:
-                log[("prefix_common", f"{p} {w}", p + w)] += 1
-                return p + w
-            return m.group(0)
-        text = COMMON_RE.sub(common_sub, text)
-    return text
+    return text.replace(JOIN, "")
 
 
 def capitalised_share(texts):
@@ -179,9 +199,11 @@ def make_sheet(cand, texts, n, seed):
              for _, g in asp.groupby("bin")]
     nonprop = cand[(cand["rule"] == "asp") & (cand["prop_freq"] == 0) & (cand["orig_freq"] == 0) &
                    (cand["hist_count"] >= 3)]
-    parts.append(nonprop.sample(min(len(nonprop), int(n * 0.2)), random_state=seed).assign(proposed=""))
+    parts.append(nonprop.sample(min(len(nonprop), int(n * 0.15)), random_state=seed).assign(proposed=""))
     com = cand[(cand["rule"] == "prefix_common") & (cand["prop_freq"] >= 1)]
-    parts.append(com.sample(min(len(com), int(n * 0.15)), random_state=seed))
+    parts.append(com.sample(min(len(com), int(n * 0.1)), random_state=seed))
+    prop = cand[(cand["rule"] == "prefix_proper") & (cand["prop_freq"] >= 1)]
+    parts.append(prop.sample(min(len(prop), int(n * 0.1)), random_state=seed))
     sheet = pd.concat(parts).drop(columns=["bin"], errors="ignore").reset_index(drop=True)
     sheet["context"] = [context(texts, r"\b" + re.escape(w).replace(r"\ ", r"\s+") + r"\b") for w in sheet["word"]]
     idx = list(range(len(sheet)))
@@ -215,7 +237,6 @@ def tune(labels_path):
     lab = pd.read_csv(labels_path)
     lab = lab[lab["correct"].astype(str).str.strip().isin(["0", "1"]) | lab["gold"].notna()].copy()
     lab["correct"] = pd.to_numeric(lab["correct"], errors="coerce").fillna(0).astype(int)
-    lab = lab[lab["rule"] != "prefix_proper"]
     val, test = lab[lab["split"] == "val"], lab[lab["split"] == "test"]
     grid = [(o, v) for o in [0, 1, 2, 5] for v in [1, 2, 5, 10, 20, 50]]
     scores = {f"{o},{v}": evaluate(val, o, v) for o, v in grid}
@@ -234,11 +255,11 @@ def thresholds():
 def apply(rules, variant):
     tau_o, tau_v, src = thresholds()
     cand = pd.read_parquet(CAND_PATH)
-    asp_map, common_set = make_maps(cand, tau_o, tau_v)
+    asp_map, common_set, proper_set = make_maps(cand, tau_o, tau_v)
     df = pd.read_parquet("data/processed/chunks.parquet")
     log = Counter()
     xh = df["lang"] == "xh"
-    new = [normalise_text(t, rules, asp_map, common_set, log) for t in df.loc[xh, "text"]]
+    new = [normalise_text(t, rules, asp_map, common_set, proper_set, log) for t in df.loc[xh, "text"]]
     df["text_raw"] = df["text"]
     df.loc[xh, "text"] = new
     df["changed"] = df["text"] != df["text_raw"]
