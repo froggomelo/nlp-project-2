@@ -8,7 +8,7 @@
 \item {\bf Claims}
     \item[] Question: Do the main claims made in the abstract and introduction accurately reflect the paper's contributions and scope?
     \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: The abstract and Introduction state the research question, hypotheses H1 and H2 and what we measure; Results and Discussion report and qualify each, and Limitations states what the method cannot show (editorial intent).
+    \item[] Justification: The abstract and Introduction state the research question, hypotheses H1 and H2 and what we measure; Results and Discussion report and qualify each, and the Discussion ends with the study's limits, including that it measures content, not editorial intent.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer NA means that the abstract and introduction do not include the claims made in the paper.
@@ -20,7 +20,7 @@
 \item {\bf Limitations}
     \item[] Question: Does the paper discuss the limitations of the work performed by the authors?
     \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: Discussion, Limitations: concentration of translated pairs in some genres and years, the labellers' isiXhosa expertise, equal-length chunks across languages, the register of the modern word list, unmeasured OCR noise, and that we measure content rather than intent.
+    \item[] Justification: Methods, Results, Discussion: the provisional pair threshold, a translated-pair floor above chance, pairs concentrated on page 2, a floor that differs between periods, no hand-checking of pairs or normaliser rewrites, a modern word list dominated by OPUS-100, and that we measure content rather than intent.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer NA means that the paper has no limitation while the answer No means that the paper has limitations, but those are not discussed in the paper. 
@@ -75,7 +75,7 @@
     \begin{itemize}
         \item The answer NA means that paper does not include experiments requiring code.
         \item Please see the NeurIPS code and data submission guidelines (\url{https://nips.cc/public/guides/CodeSubmissionPolicy}) for more details.
-        \item While we encourage the release of code and data, we understand that this might not be possible, so “No” is an acceptable answer. Papers cannot be rejected simply for not including code, unless this is central to the contribution (e.g., for a new open-source benchmark).
+        \item While we encourage the release of code and data, we understand that this might not be possible, so ``No'' is an acceptable answer. Papers cannot be rejected simply for not including code, unless this is central to the contribution (e.g., for a new open-source benchmark).
         \item The instructions should contain the exact command and environment needed to run to reproduce the results. See the NeurIPS code and data submission guidelines (\url{https://nips.cc/public/guides/CodeSubmissionPolicy}) for more details.
         \item The authors should provide instructions on data access and preparation, including how to access the raw data, preprocessed data, intermediate data, and generated data, etc.
         \item The authors should provide scripts to reproduce all experimental results for the new proposed method and baselines. If only a subset of experiments are reproducible, they should state which ones are omitted from the script and why.
@@ -87,7 +87,7 @@
 \item {\bf Experimental Setting/Details}
     \item[] Question: Does the paper specify all the training and test details (e.g., data splits, hyperparameters, how they were chosen, type of optimizer, etc.) necessary to understand the results?
     \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: Methods: 357/77/77 train/validation/test issues stratified by year; k, C and the kNN neighbour count chosen on validation; normaliser thresholds by validation F0.5; the probe is class-balanced logistic regression (scikit-learn, L-BFGS).
+    \item[] Justification: Methods: 357/77/77 train/validation/test issues stratified by year; k, C and the kNN neighbour count chosen on validation; normaliser thresholds fixed in advance to favour precision; the probe is class-balanced logistic regression (scikit-learn, L-BFGS).
     \item[] Guidelines:
     \begin{itemize}
         \item The answer NA means that the paper does not include experiments.
@@ -115,7 +115,7 @@
 \item {\bf Experiments Compute Resources}
     \item[] Question: For each experiment, does the paper provide sufficient information on the computer resources (type of compute workers, memory, time of execution) needed to reproduce the experiments?
     \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: README.txt: embedding takes about 35--40 minutes for LaBSE's four variants and about 20 minutes for multilingual-E5 on one Colab T4 GPU (16 GB); every other stage runs on a laptop CPU, the analysis in about 15 minutes per encoder.
+    \item[] Justification: README.txt: embedding takes about one hour on one free Colab T4 GPU (16 GB); every other stage runs on a CPU, the analysis in about 15 minutes per encoder.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer NA means that the paper does not include experiments.
@@ -165,7 +165,7 @@
 \item {\bf Licenses for existing assets}
     \item[] Question: Are the creators or original owners of assets (e.g., code, data, models), used in the paper, properly credited and are the license and terms of use explicitly mentioned and properly respected?
     \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: We cite the archive (Schoots et al., 2023), the modern corpora (Vukuzenzele, isiXhosa Wikipedia, OPUS-100) and both encoders (LaBSE, multilingual-E5), and use them within their terms. \TBD{state each licence from the Hugging Face dataset and model cards}
+    \item[] Justification: The Imvo texts are in the public domain (Schoots et al., 2023). Licences from the Hugging Face cards: Vukuzenzele CC BY 4.0, isiXhosa Wikipedia CC BY-SA 3.0 and GFDL, LaBSE Apache 2.0, multilingual-E5 and the XLM-R tokeniser MIT. OPUS-100's card lists its licence as unknown, so we use it only to count word frequencies and redistribute none of its text. Dataset revisions are recorded in results/lexicon/lexicon\_sources.json.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer NA means that the paper does not use existing assets.
@@ -193,7 +193,7 @@
 \item {\bf Crowdsourcing and Research with Human Subjects}
     \item[] Question: For crowdsourcing experiments and research with human subjects, does the paper include the full text of instructions given to participants and screenshots, if applicable, as well as details about compensation (if any)? 
     \item[] Answer: \answerNA{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: No crowdsourcing or research with human subjects; hand-labelling was done by the authors.
+    \item[] Justification: No crowdsourcing or research with human subjects.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer NA means that the paper does not involve crowdsourcing nor research with human subjects.

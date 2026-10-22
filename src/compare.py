@@ -27,7 +27,7 @@ bootstrap CI of the gap change must lie inside +/- margin:
   inconclusive    neither (more test issues would be needed to decide)
 
 Usage:
-    python src/compare.py --variants raw modern modern_asp modern_prefix [--margin 0.02]
+    python src/compare.py --variants raw modern modern_asp modern_prefix modern_keepnames [--margin 0.02]
 """
 import argparse
 import json
@@ -77,7 +77,7 @@ def h2_verdict(ci90, ci95, margin):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--variants", nargs="+", default=["raw", "modern", "modern_asp", "modern_prefix"])
+    ap.add_argument("--variants", nargs="+", default=["raw", "modern", "modern_asp", "modern_prefix", "modern_keepnames"])
     ap.add_argument("--margin", type=float, default=0.02, help="equivalence margin for the gap change (H2)")
     ap.add_argument("--model-tag", default="LaBSE")
     ap.add_argument("--n-boot", type=int, default=1000)

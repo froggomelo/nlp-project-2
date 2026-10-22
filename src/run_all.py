@@ -20,7 +20,7 @@ import sys
 from importlib import metadata
 from pathlib import Path
 
-VARIANTS = ["raw", "modern", "modern_asp", "modern_prefix"]
+VARIANTS = ["raw", "modern", "modern_asp", "modern_prefix", "modern_keepnames"]
 PACKAGES = ["pandas", "pyarrow", "numpy", "scipy", "scikit-learn", "torch", "transformers",
             "sentence-transformers", "huggingface_hub", "matplotlib"]
 
@@ -57,7 +57,7 @@ def main():
         sh("src/normalise.py", "candidates")
         if Path("labels/normaliser_labelled.csv").exists():
             sh("src/normalise.py", "tune")
-        for rules in ["all", "asp", "prefix"]:
+        for rules in ["all", "asp", "prefix", "keepnames"]:
             sh("src/normalise.py", "apply", "--rules", rules)
         sh("src/tool_metrics.py")
         sh("src/synthetic_check.py")

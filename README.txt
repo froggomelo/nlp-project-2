@@ -25,7 +25,8 @@ PIPELINE (run from the project root)
      = prepare_data.py   clean, chunk (60 words), flag boilerplate, split by issue (70/15/15 by year)
        build_lexicon.py  modern isiXhosa word list with per-source counts; records each dataset's
                          Hugging Face revision and token counts in results/lexicon/lexicon_sources.json
-       normalise.py      candidate rewrites; tune (if labels exist); apply all / asp / prefix variants
+       normalise.py      candidate rewrites; tune (if labels exist); apply all / asp / prefix variants and
+                         keepnames (both rules, but likely proper names keep their 1880s spelling)
        tool_metrics.py   tokens per word (LaBSE, XLM-R) and out-of-vocabulary rate per variant
        synthetic_check.py  validates the language-removal method on data with a known answer, with clean
                            pairs and with 40% false pairs (as in the real candidates)
@@ -57,6 +58,11 @@ PIPELINE (run from the project root)
        compare.py      raw vs modern vs ablations: all / floor / gap, alignment, paired bootstrap CIs,
                        and an H2 verdict (equivalent / different / inconclusive) against a +/-0.02 margin
        qualitative.py  topic clusters, isiXhosa-only topics, per-issue divergence vs permutation baseline
+     Post-hoc checks on the test predictions (CPU, ~2 min; no retraining):
+       python src/posthoc_checks.py . > results/posthoc_checks.txt
+       = floor by pair similarity, gap without number-heavy chunks, separability by year
+     Report figures from saved results (CPU, ~10 s):
+       python src/report_figures.py   -> report/figures/fig_results.pdf, fig_topics.pdf
      Without labels yet, add --threshold 0.55 for a provisional run. That threshold applies to LaBSE;
      the second encoder gets the threshold that keeps the same share of its candidates (pairs.py
      match), because its similarities sit in a different range. The LaBSE run also repeats the raw
@@ -86,16 +92,19 @@ KEY DESIGN DECISIONS
     reported for comparison because it also removes genuine content differences (synthetic_check.py).
   - Only accuracy above the translated-pair floor counts as a content difference.
   - The normaliser rewrites a word only if the original is unattested in modern text and the rewrite is
-    attested, and joins a prefix only if the joined form is attested; thresholds favour precision (F0.5)
-    because over-correcting authors' spelling is the costly error. All three rule families are hand-checked.
-  - Alignment across spelling variants is measured on embedding-free (anchor) pairs to avoid selection bias.
+    attested, and joins a prefix only if the joined form is attested. The thresholds (2, 5) are fixed in
+    advance to favour precision, because over-correcting authors' spelling is the costly error; all three
+    rule families are on the hand-checking sheet, and `normalise.py tune` replaces the thresholds (by
+    validation F0.5) if a fluent reader labels it.
+  - Alignment across spelling variants is measured on embedding-free (anchor) pairs once pairs are labelled;
+    until then compare.py uses pairs selected in raw space, which favours raw, and says so.
 
 CHANGES ON 21 OCTOBER 2026 (team note: delete this section before submission)
   What changed
     1. classify.py      C grid widened to 0.01-1000; warns if the chosen C sits at the edge of the grid.
     2. pairs.py match   the second encoder (E5) gets its own provisional pair threshold: the one that
                         keeps the same share of its candidates as LaBSE keeps at 0.55. E5 similarities
-                        all lie between 0.83 and 0.87, so a threshold of 0.55 filtered nothing.
+                        mostly lie between 0.83 and 0.88, so a threshold of 0.55 filtered nothing.
     3. run_all.py       the LaBSE run repeats the raw classifier with stricter pairs (0.65) into
                         results/raw_thr0.65/, to check the gap does not depend on weak pairs.
     4. normalise.py     prefix joins before capitalised words must pass the word-list check (the joined
@@ -149,19 +158,43 @@ CHANGES ON 21 OCTOBER 2026 (team note: delete this section before submission)
     numpy 2.1.3), including a full-size stand-in dataset for the memory check.
 
   Expected notice, not an error
-    "multilingual-e5-base: no embeddings for ['modern_asp', 'modern_prefix']; analysing ['raw',
-    'modern']". The notebook embeds only raw and modern with E5 (the robustness check); the
-    single-rule ablations run on LaBSE only.
+    "multilingual-e5-base: no embeddings for ['modern_asp', 'modern_keepnames', 'modern_prefix'];
+    analysing ['raw', 'modern']". The notebook embeds only raw and modern with E5 (the robustness
+    check); the ablations and the keepnames variant run on LaBSE only.
+
+  Fixes after a code check (later on 21 October)
+    12. normalise.py    rewrites now keep the author's capitalisation inside a word (uTixo -> uThixo,
+                        was uthixo; 4 tokens in the corpus); the labelling sheet now finds an example
+                        context for every word (it searched only 20,000 texts before).
+    13. qualitative.py  notes when the best number of topic clusters is the largest tried (32 was).
+    14. smoke_test.py   passed an explicit pair threshold: the stand-in embeddings' similarities are
+                        below the tuning grid, so the test stopped at classify.py. It now runs end to end.
+    The fix in 12 changes 4 tokens, so the next Colab run should move the reported numbers negligibly.
+
+  New analyses (later on 21 October)
+    15. normalise.py --rules keepnames: a fifth variant that modernises everything except likely names
+        (capitalised in >= 90% of uses), to test whether the alignment gain survives without rewriting
+        names of peoples, places and God. Added to run_all.py, compare.py, tool_metrics.py, the smoke
+        test and the Colab notebook (embedded with LaBSE only). Not run: the paper mentions it only as a
+        test the code supports.
+    16. posthoc_checks.py check 4: the gap per period (1884-89, 1890-94), each against its own floor.
+        Separability rises over the decade, but so does the floor; the gap does not grow (LaBSE change
+        -0.012, 95% CI -0.073 to +0.048). The paper now says the rise is language, not content.
+
+  Final report edits (evening of 21 October)
+    17. normalise.py    capitalised_share leaves out ALL-CAPS uses: they say nothing about whether a word
+                        is a name, and counting them hid Tixo (85% -> 99% capitalised). Likely names
+                        rewritten by aspiration: 191 words, 19,917 rewrites (was 149 / 12,966).
+    18. Text side rerun locally from the course corpus (prepare_data, build_lexicon, normalise,
+        tool_metrics; no embedding or classifier runs). Chunks, splits and the data card are identical to
+        the Colab bundle's, and the normaliser counts match the Colab run exactly (289,816 / 797 / 47,517).
+        New: results/lexicon/lexicon_sources.json (3,329,042 tokens; 88.5% OPUS-100) and
+        results/tool_metrics for the current normaliser (modern: 24.8% OOV, 2.10 LaBSE tokens per word).
+    19. Label-free pair check (from results/raw/pair_candidates.parquet): kept pairs share >= 3 names or
+        numbers in 25.7% of cases against 2.9% of dropped ones.
 
   Next steps, in order
-    1. Rerun the analysis on Colab with the fixed src/classify.py and src/run_all.py:
-         session still open   upload both files into src/, rerun only the analysis cell and the
-                              zip/download cell (no re-embedding; ~10-20 min)
-         session closed       python src/make_colab_bundle.py, then Run all (~1 h)
-       Watch for "chosen C ... is at the edge of the grid": C=1000 was often chosen in the failed run.
-    2. Send results/tool_metrics/tool_metrics.csv from the machine that ran prepare: Table 1's
-       "modern" row must be updated for the new normaliser (it was not in results_all.zip).
-    3. Label translated pairs (labels/LABELLING_GUIDE.md, job 1); the team can do this from shared
-       names and numbers. The normaliser words (job 2) need a fluent isiXhosa reader: if nobody is
-       available, skip them and report the thresholds as fixed in advance.
-    4. One final python src/run_all.py analyse after labelling.
+    The report is complete without further runs. Optional, if time allows:
+    1. Colab Run all with a fresh bundle (python src/make_colab_bundle.py) adds the keepnames row.
+    2. Labelling translated pairs (labels/LABELLING_GUIDE.md) would replace the provisional 0.55
+       threshold; the paper would then need its "not hand-labelled" sentences updated.

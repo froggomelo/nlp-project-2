@@ -1,0 +1,554 @@
+{
+ "variant": "raw",
+ "k": 16,
+ "silhouette_val": {
+  "8": -0.006248658522963524,
+  "12": -0.00847028847783804,
+  "16": -0.00620987406000495,
+  "24": -0.014585296623408794,
+  "32": -0.015130664221942425
+ },
+ "jsd": {
+  "observed_mean": 0.20625131583502163,
+  "permuted_mean": 0.041270429930544,
+  "diff_mean": 0.16498088590447754,
+  "diff_ci": [
+   0.15216018646046778,
+   0.17778064626603204
+  ],
+  "share_issues_above_95pct": 1.0,
+  "n_issues": 77
+ },
+ "pair_pages": {
+  "2": 0.632,
+  "3": 0.331,
+  "4": 0.033,
+  "1": 0.002,
+  "5": 0.002
+ },
+ "all_xh_pages": {
+  "2": 0.486,
+  "3": 0.41,
+  "4": 0.071,
+  "1": 0.025,
+  "5": 0.008,
+  "6": 0.0
+ },
+ "clusters": [
+  {
+   "cluster": 3,
+   "n": 1,
+   "xh_share": 1.0,
+   "xh_overrep": 1.5042780160563072,
+   "pair_share": 0.0,
+   "top_pages": {
+    "3": 1.0
+   },
+   "words_xh": [],
+   "words_en": [],
+   "examples_xh": [
+    "kuba ngati ukucalula okunjalo kuyakudala ubutshaba kwaba Ntsundu naba Mhlope obungekoyo ngoku. - U SIR GORDON : Make silibale ukuba kuko umteto onjalo owaka wangeniswa sikangele isambuku sento. Uyayifunana umzi opesheya "
+   ]
+  },
+  {
+   "cluster": 13,
+   "n": 1,
+   "xh_share": 1.0,
+   "xh_overrep": 1.5042780160563072,
+   "pair_share": 0.0,
+   "top_pages": {
+    "3": 1.0
+   },
+   "words_xh": [],
+   "words_en": [],
+   "examples_xh": [
+    "nelikoyo lite nqwi e \u201c Biteni,\u201d kodwa ungamana ukuva lisiti \u2014 wova ngam wona xana kunzima. ILINGA. \u2014 Libalele, e Wesile kuqalwe ngo Mvulo ukutandazelwa imvula ; inkonzo zayo kuya kude kubo lolwcsi Ne usuku. (NGU QEBEI.) "
+   ]
+  },
+  {
+   "cluster": 8,
+   "n": 2200,
+   "xh_share": 0.9995454545454545,
+   "xh_overrep": 1.5035942533217361,
+   "pair_share": 0.014545454545454545,
+   "top_pages": {
+    "3": 0.43,
+    "2": 0.42,
+    "4": 0.1
+   },
+   "words_xh": [
+    "yimveliso",
+    "damasi",
+    "lehlati",
+    "ndingeniselelwe",
+    "elingengapezulu",
+    "elinomda",
+    "sokudliwa",
+    "mmiso"
+   ],
+   "words_en": [],
+   "examples_xh": [
+    "unamabali obunzinaa nengxubushano kwi mbalelani nawe ze Mvo leyo; aye engaswelekile namalungelo afunyenweyo aba lilungelo lona upela. Mandikubongoze ukuba uqoshehse kumalinga amahle okade uwavunela amakowetu, nalendawo i",
+    "kubakungeko wumbi ongavela kwelinye ilizwe onako ukuyilungisela kakuhle ihambo yemfundo yelilizwe njengaye. Yinto ebesimise iuyawo kuyo kakade le; saye sitemba kanjako okokuba nanxa lide lafika ixesha. lokokuba makakulul",
+    "bangawabanga ngayo amafa oyise. Ngati angene amanzi endlwini kumzi wase bu Bomvini. Ubungewuse ucela ukuba kumiswe umda kulemicimbi kutiwe abatshate ngoluhlobo emva kwexesha elingamiswayo bapatwe ngelisiko livelayo, kodw"
+   ]
+  },
+  {
+   "cluster": 4,
+   "n": 3508,
+   "xh_share": 0.9791904218928165,
+   "xh_overrep": 1.4729746251862643,
+   "pair_share": 0.02708095781071836,
+   "top_pages": {
+    "3": 0.49,
+    "2": 0.21,
+    "4": 0.2
+   },
+   "words_xh": [
+    "orenji",
+    "ngeknlu",
+    "pril",
+    "pvt",
+    "ngedaseni",
+    "ibran",
+    "ikwakwini",
+    "jamieson"
+   ],
+   "words_en": [
+    "bali",
+    "total",
+    "grand",
+    "ross",
+    "run",
+    "oka",
+    "standard",
+    "out"
+   ],
+   "examples_xh": [
+    "ne 8d ngedazini; Irasi eluhlu k 1/4 ne 1/5 ngekulu; Ibabile 2/8 ne 4/ kulu; Itapile 14/ ngekulu; Umbona ne 9/5 ngekulu; Inkuku 1/41 inye ; ^da 2/ ne 2/2 lilinye; Ikwakwini 7/6 Isemile 5/6 ngekulu; Ingqolowa 12/11 1; Imbo",
+    "ngengxowa; Isemile 4/ ne 6/ nge ngxowa ; Umbona 13/6 ne 14/ ngengxowa; Irasi 9/ ne 10/ ngengxowa ; Amatapile 4/ ne 8/ ngekulu leponti ; Ihabile 6/9 ne 7/3 ngekulu ; Inkuui 20/ ne 35/ ngefltra; Ibhotolo 1/6 ne 2/9 ngapont",
+    "ngekulu; Umgubo osefiweyo 10/ ngekulu, ongasefiweyo 8/; Umbona 3/6 ne 3/9 ngekulu; Itapile 2/3 ne 4/6 ngekulu ; Ikwakwini 10/ inye. E QONCE. \u2014 Imalike ngo Mgqibelo, 17 January : \u2014 Ibhotolo 6d ne 2/4 ngeponti ; Amaqanda /"
+   ]
+  },
+  {
+   "cluster": 0,
+   "n": 5125,
+   "xh_share": 0.9572682926829268,
+   "xh_overrep": 1.4399976481506815,
+   "pair_share": 0.0351219512195122,
+   "top_pages": {
+    "2": 0.36,
+    "3": 0.35,
+    "4": 0.19
+   },
+   "words_xh": [
+    "uyadyaraza",
+    "ubeleke",
+    "ayikululwanga",
+    "kwatshatiswa",
+    "kutshatiswe",
+    "kusitele",
+    "akatengeli",
+    "kumbaleli"
+   ],
+   "words_en": [
+    "january",
+    "october",
+    "august",
+    "december",
+    "september",
+    "february",
+    "june",
+    "november"
+   ],
+   "examples_xh": [
+    "linenqina elimhlope kummlenze wangasemva nase kohlo engcitsini. Elinye libomvu line skeyi emva kwendlebe yase kohlo, nenkonjane kwakulo ndlebe, icandiwe indlebe yase kunene, ibunzi lifuna ukuba ralara, uboya kumanqina om",
+    "ukuyicwangcwisa inteto yohlanga. Intonina; kwapambi kwetu apa asibabonina obhululu betu abarabaxa \u2014 ama Bhulu \u2014 bepanda ngawo omane nje ukuzinzisa i taal yawo? Isi Xhosa esi siyakuyekwa sidake na sona, amadoda eseko, ebo",
+    "isingci side kwa nomsila, linentsimbi kwawaugapambili, nempawu emilenzeni. IMAZI EMTUQWA eminyaka mihlanu, inenkonyana, itwe cwi kwindlebe yase kohlo, inamabalana amhlope kumlenze wasekunene, umvuzo weponti koya kuwafuma"
+   ]
+  },
+  {
+   "cluster": 14,
+   "n": 4666,
+   "xh_share": 0.890484354907844,
+   "xh_overrep": 1.339536038729952,
+   "pair_share": 0.02486069438491213,
+   "top_pages": {
+    "2": 0.61,
+    "3": 0.29,
+    "4": 0.09
+   },
+   "words_xh": [
+    "alibenzakalisi",
+    "abebekwele",
+    "ligqita",
+    "ilawu",
+    "idutyulwe",
+    "lokwekwe",
+    "seyifile",
+    "rantini"
+   ],
+   "words_en": [
+    "durban",
+    "team",
+    "train",
+    "aka",
+    "oka",
+    "chemist",
+    "cricket",
+    "miles"
+   ],
+   "examples_xh": [
+    "ne Kruidfontein kwabanjwa inkabi kwi plasi ngokusuke zisele edamini. Kufuneke isheleni ezintlanu ukuzikulula, ute ke ku Mlungu ndiyakugqita apa emalanga zendishi. ye ingxowa yombona endoyikulula ngemali ndakubuya e Rafu ",
+    "nentsapo. Sibanqwenelela ihambo emnandi emanzini nempilo. AKUKO ndaba zityulu kumapepa ase Natal. EMCEBA Emampondweni, amaramba anconywa ngokugqiba umbona emasimini Kutiwa atya ngokucokisa ngapezu kwempuku, awashiyi mape",
+    "yona Emcancatweni yokumbulela ngokulwa idabi labo. LENDLELA intsha izakubandakanya u Gcaleka ne Cawa iseliqaliwe ecwebeni le Xesi kwizibuko Lentlalo. Abanyebabhekisa e Monti abanye e Cawa ukumba kwabo. U RULUNELI u Sir H"
+   ]
+  },
+  {
+   "cluster": 15,
+   "n": 5354,
+   "xh_share": 0.8335823683227493,
+   "xh_overrep": 1.2539396312400632,
+   "pair_share": 0.024280911468061262,
+   "top_pages": {
+    "3": 0.61,
+    "2": 0.3,
+    "4": 0.08
+   },
+   "words_xh": [
+    "hosana",
+    "ndiyiva",
+    "ndiqale",
+    "ndakufika",
+    "ndiyibona",
+    "ndagqiba",
+    "ndinge",
+    "ndasuka"
+   ],
+   "words_en": [
+    "translators",
+    "myself",
+    "translation",
+    "hoping",
+    "bible",
+    "yourself",
+    "ticket",
+    "you"
+   ],
+   "examples_xh": [
+    "ngobungcatu yena. Engene ubani, selenjengomntu ohla intaba ebaleka; ungati ubaleke ngengqondo kuqala, ze afike kwinqanam ayakuvuleleka ngohlobo angena kuzibamba naye; abayakuti nabakangeleyo bafihle amehlo ngokukumbula i",
+    "tabata inyongo yenkomo uyilengalengise endlwini yenkuka pezu kwendawo eziwa. beka kuyo amaqanda. Tata enye uyitshize kwindawo engaba bawo. Kwisituba sa enye uyakufika selengaseko. Ndina ebona awo.\u201d Hambani ke niye nenjen",
+    "kutsho ke nditi, funani into ezipambili zokanyo, niyeke ubuyata neratshi, niti ngabanye ngabanye natnkele Izimvo: ngokuba makowetu nibonanje indoda le or i lady xa lingamkeli ipepa lesi Xhosa, umhlaumbi elesi Ngesi, okan"
+   ]
+  },
+  {
+   "cluster": 9,
+   "n": 4985,
+   "xh_share": 0.8070210631895687,
+   "xh_overrep": 1.213984043850456,
+   "pair_share": 0.0156469408224674,
+   "top_pages": {
+    "3": 0.56,
+    "2": 0.33,
+    "4": 0.1
+   },
+   "words_xh": [
+    "igudisa",
+    "emolientine",
+    "etanjiswayo",
+    "mtubi",
+    "nezilonda",
+    "bhotilana",
+    "ityiwayo",
+    "bugude"
+   ],
+   "words_en": [
+    "acid",
+    "kaffirs",
+    "hebrew",
+    "clay",
+    "chest",
+    "germs",
+    "milk",
+    "kaffir"
+   ],
+   "examples_xh": [
+    "ezizinto. Zibangwa yintonina zibangwa kukungeva hai, ukungeva kufundiswa komfazi wezimini, seyenjalo njekeseyezimisele ukonakalisa ngapezulu. Yinto apa ode uyibone ungumhambi ukuba lomfazi uyikohlile lendoda, ubone ukuba",
+    "bawafumane amapepa. Ngati kwanele okutetiweyo. Imbulu zentsomi yinteto eninzi kakulu xa umntu ezenza into angeyiyo. Elinye ityenjana laya kufilisha kanti umnene esicakumbana nje seletsho ngesifuba esiliqowa, akanahempe u",
+    "amanxeba amabini. Wati kaloku wafuna ukuzinqumla umqala. Wabanjwa engekazenzakalisi kuba asivumanga ukungena isitshetshe. Usuke kaloku waya kulalela umninimzi njengokuba ebeye kweminye imizi. Ote weza yena enxilile, esap"
+   ]
+  },
+  {
+   "cluster": 5,
+   "n": 7334,
+   "xh_share": 0.7601581674393237,
+   "xh_overrep": 1.143489220004624,
+   "pair_share": 0.038451049904554134,
+   "top_pages": {
+    "3": 0.51,
+    "2": 0.42,
+    "4": 0.06
+   },
+   "words_xh": [
+    "tandazi",
+    "njengohlanga",
+    "ezisakuba",
+    "incede",
+    "ngelicebo",
+    "awetu",
+    "sibhekisa",
+    "yimizi"
+   ],
+   "words_en": [
+    "editorial",
+    "zabantsundu",
+    "imvo",
+    "endorse",
+    "article",
+    "nigger",
+    "isigidimi",
+    "bacas"
+   ],
+   "examples_xh": [
+    "zonke ezintlambo awusakuba nqingatisile nokuqingatisa ukubuhlaulela ububi owenze ku bantu bakowetu. Kuvela kubantu bakowetu amagqira, abaqondisi-mteto, abafundisiabatshatsheleyo ngemfundo, kupela esikutetayo kukuba masiy",
+    "ngasebantwini. Zilungisiwe ezindawo zombini zingaba zipumile engozini yokuvalwa zintshaba zokuhamba kokukanya. Awusakuzizamana ezonto umzi wakowetu ube usala ukuba sibuyelwe bunyama nokutyobeka okuhlalele abantu abangafu",
+    "yagcakanyelwa ngabobantu. Kanti oku kokuhambisekayo pakati kwetu mhlambi untsundu yonke imihla. Asinto ingatelwanqa bani ke le yokuba amawetu emkangele u Rulumeni njengomntu onocuku oseloko engxamele ukubabandezela. Siti"
+   ]
+  },
+  {
+   "cluster": 7,
+   "n": 3483,
+   "xh_share": 0.737008326155613,
+   "xh_overrep": 1.1086654226863453,
+   "pair_share": 0.0203847258110824,
+   "top_pages": {
+    "2": 0.42,
+    "3": 0.42,
+    "4": 0.13
+   },
+   "words_xh": [
+    "uhlauliswe",
+    "kulemali",
+    "iyonke",
+    "nezitembiso",
+    "azidipe",
+    "exabiso",
+    "zimokolo",
+    "bem"
+   ],
+   "words_en": [
+    "cash",
+    "shillings",
+    "annum",
+    "pounds",
+    "per",
+    "savings",
+    "collector",
+    "valued"
+   ],
+   "examples_xh": [
+    "zaposwa kuyo. Iyonke lomali izindleko li \u00a3160 nobu vuvu besheleni nepeni nehalafu, ngapandle kwaleyo mali ibimangalelwe kade neyala magqwetana mancinane. Sitsho ngoko ke ukuti umzi wasema Gqunukwebeni weyele ngelomkono. ",
+    "ngo \u00a31. Kauti ke uvulela imali, uenkomo, negusha, nebhokwe, nenkuku. Eyamkelweyo esandleni ibe \u00a330 6 5. Yaba ke igqitile ebutyaleni, ekoti kwakuhlaulwa izitembiso zemali, kutengiswe impahla ehambayo igqite kumashumi amah",
+    "ebunzulu buzi inches ezitile. Ubalekile, wabonwa selelengalenga emtini, ezixhomile. Kuranelwa ukuba wenziwa bubukwele. ISIBONDA esingu Ncapayi Mpolweni ngo. lwesi-Hlanu olugqitileyo sasipambi kwemantyi ngokujamela ngomko"
+   ]
+  },
+  {
+   "cluster": 1,
+   "n": 4936,
+   "xh_share": 0.7070502431118314,
+   "xh_overrep": 1.0636001369603953,
+   "pair_share": 0.053687196110210694,
+   "top_pages": {
+    "3": 0.56,
+    "2": 0.32,
+    "4": 0.09
+   },
+   "words_xh": [
+    "zifundo",
+    "dikwayo",
+    "obuzeleyo",
+    "essay",
+    "espin",
+    "higher",
+    "pocock",
+    "weis"
+   ],
+   "words_en": [
+    "methodists",
+    "ely",
+    "evangelist",
+    "theological",
+    "lightfoot",
+    "competency",
+    "hymn",
+    "arithmetic"
+   ],
+   "examples_xh": [
+    "yakankanya ipepa, ebelifanele ukuba nengxoxo onefa, eliya kufundwa ngu Rev. G. Kakaza ngo kulondoloza. Kumaqela onke oluntu singayiyalezela ukuba londawo ipulapulwe, nokoke, ndicinga okokuba abona bantu bafuna imfundiso ",
+    "bazo, kuba abanabulungisa bonke. Besiba tina umntwana efundisa abanye ufanele ukugqita iziyalo zesicaka senkosi afundisa pantsi kwaso ukuze agxotwe ingabi liratshi elidibene nolnnya. Kwenjiwenjalo kweyase Rura ititsliala",
+    "makadutyulwe ngomteto kuba sukuba eze kuba. LIXSPA lokucheba kamba manene akowetu: Mazifike imali namagama enu. Lelenu ipepa, lilungiselela nina. Bambisanani ngalo. U MR. JOHN F. MAZAMISA, ehamba nonyana wake u Mr. Jer. "
+   ]
+  },
+  {
+   "cluster": 12,
+   "n": 5044,
+   "xh_share": 0.6927042030134813,
+   "xh_overrep": 1.042019704222985,
+   "pair_share": 0.0676050753370341,
+   "top_pages": {
+    "3": 0.49,
+    "2": 0.42,
+    "4": 0.07
+   },
+   "words_xh": [
+    "michau",
+    "kutshutshisa",
+    "waxaswa",
+    "bidwell",
+    "jenner",
+    "crosbie",
+    "rayner",
+    "brister"
+   ],
+   "words_en": [
+    "villiers",
+    "pope",
+    "wiener",
+    "negrophilist",
+    "barkly",
+    "heerden",
+    "mayor",
+    "lange"
+   ],
+   "examples_xh": [
+    "apa, eyake indawo itatwe ugu Rev. J. Monyatsi wase Blikana, Egqili eyake, itatwe ngu Rev. J. Moyedi. KWELANAMHLA abalesi bofumana kwimihlati yezaziso izimvo aba sicela ukuba sizibhengeze o Messrs. Gray no Blaine, abangen",
+    "ngo, Rev. C. Pamla umhlobo wetu osekoyo kumadoda amakulu enditemba ukuba bayancedisana Mr. P. Sepamla \u2014 ukuba bandazise. Mandiyeke owako, Kamastone. pandle kokuba lilungu, amadoda alontlanganiso, anengxande angene onke e",
+    "leyo. Yaye igushakazi ka Mr. Strachan yona ifumene itakane elinentloko ezimbini. UKUBALELA. \u2014 Kunconywa inqina yemphla e Bhekesdorp. Kumapandle alo kuxelwa ifama elingu Mr. Andries van der Walt eselilahlekwe liwaka elina"
+   ]
+  },
+  {
+   "cluster": 6,
+   "n": 5055,
+   "xh_share": 0.6623145400593472,
+   "xh_overrep": 0.9963052023257204,
+   "pair_share": 0.06627101879327399,
+   "top_pages": {
+    "3": 0.52,
+    "2": 0.4,
+    "4": 0.07
+   },
+   "words_xh": [
+    "lobhengula",
+    "gecelo",
+    "amaxesibe",
+    "nowama",
+    "zihlahla",
+    "argus",
+    "ucandwe",
+    "ndabuko"
+   ],
+   "words_en": [
+    "lobengula",
+    "faku",
+    "letsie",
+    "dinizulu",
+    "zulus",
+    "nqwiliso",
+    "zululand",
+    "umhlangaso"
+   ],
+   "examples_xh": [
+    "ukupendula amazwi asepepeni lako, ati \u201cuncedo Iwenkomo\u201d abe balwe ngu Mkoloni. Manditi kulungile kakulu ukuboniswana ngalendawo. Akuko mntu uti makulahlwe umhlaba, kutiwa makusetyenzwe umhlaba. Abantu abantsundu banikwe ",
+    "yokuba lomteto uze ungamiselwa libandla elibekekileyo ngezizatu eziyakuma. Inteto amadoda kwezintlanganiso mazingapeleli emoyeni, kodwa mazibhalwe zishicilelwe ngenteto yesi Ngesi. Ikhaba elifundisiweyo malincedisane nen",
+    "kusiti qapu le nje yokuba intlombe zalelwe. Ulindele kozayo unyaka ukuba kungeniswe isicelo sokuba ama Xhosa akuyeke nokuvumaoku. Uba yena abantsundu abawuxhaseleyo lomteto ngaba bangase Dikeni nase Qonce. Uqinisekile ye"
+   ]
+  },
+  {
+   "cluster": 10,
+   "n": 8552,
+   "xh_share": 0.3249532273152479,
+   "xh_overrep": 0.4888199960968753,
+   "pair_share": 0.05788119738072965,
+   "top_pages": {
+    "3": 0.69,
+    "2": 0.21,
+    "4": 0.09
+   },
+   "words_xh": [
+    "nalomteto",
+    "painter",
+    "usekele",
+    "logan",
+    "aroxe",
+    "hofmeyr",
+    "hiliya",
+    "akacingi"
+   ],
+   "words_en": [
+    "debater",
+    "bamberger",
+    "cronwright",
+    "malcomess",
+    "plump",
+    "subterfuge",
+    "dormer",
+    "opponent"
+   ],
+   "examples_xh": [
+    "abangenakupatwa ngokwahlukileyo kwabamhlope. Azingetshiswe ezabo, zingatshiswa ezabamhlope. U Mr. Sikundla ute ukuba u Rulumeni uzama ukupelisa ubusela siyavisisana naye kulonto, kodwa akusakunceda luto ukubabeka enkataz",
+    "zaba lahlekisi. U Yuzi wosikangelela amalungelo etu. Sitsho ngokumtemba kuba akayo dyongosi e Palamente. nobuhlobo bake nabantu abantsundu bungqinwa mhlope ngexa abese Kubusi oko wayengochase ukupitizeliswa kwabantsundu ",
+    "ndite kwasu nika inyaniso ezingapezulu. MR. INNES lendlela kutatyatwe ngayo mayipeliswe ibuhlazo. U SIR TAOMAS SGANLEN ukwa kuluvo luka Mr. Innes, waye engayiboni into yokuti umntu osebenzela u Rulumeni arunywe okunye xa"
+   ]
+  },
+  {
+   "cluster": 2,
+   "n": 8147,
+   "xh_share": 0.12630416104087394,
+   "xh_overrep": 0.18999657279022217,
+   "pair_share": 0.012028967718178471,
+   "top_pages": {
+    "3": 0.78,
+    "4": 0.13,
+    "2": 0.08
+   },
+   "words_xh": [
+    "abatandazi",
+    "biritani",
+    "civil",
+    "ngabavoti",
+    "entlalweni",
+    "abambalwa",
+    "bangabi",
+    "zeziqu"
+   ],
+   "words_en": [
+    "fixity",
+    "utilise",
+    "tenants",
+    "flocks",
+    "worry",
+    "gradual",
+    "senseless",
+    "complications"
+   ],
+   "examples_xh": [
+    "nangezona ntlobo zilungileyo zenkomo negusha, baxelelwe ngembangi kwaneyeza lokwekwe, kwanangolwalamano kwingca ekula ematambekeni, nexabiso elinikwa ngoboya e-London. Akungakuba sinqwenela ngxakangxaka yaluto. Ilinga el",
+    "endaweni yokuba uyijonge into ukulunga nokungalungi ngamacala omabini usuke ujonge ngacalanye, uze ke ufane uwomele kwelocala noko ngati alinancasa yanto. Ke umzi awuboni ukuba uyasizwa xa ati u Rulumente makungatshilisw",
+    "abavunyelwe ukuba bawahlule pakati. Ke makabe uyigqibile yonke iucazo yalomteto. UKUXOXWA KWAWO. Angati ke ake ecapa kwinteto zokuwuxubu sha esezite zenziwa ngexeshana elifutshaue ote wapambi komzi. Kwenziwe isikalazo so"
+   ]
+  },
+  {
+   "cluster": 11,
+   "n": 1,
+   "xh_share": 0.0,
+   "xh_overrep": 0.0,
+   "pair_share": 0.0,
+   "top_pages": {
+    "3": 1.0
+   },
+   "words_xh": [],
+   "words_en": [],
+   "examples_xh": []
+  }
+ ]
+}

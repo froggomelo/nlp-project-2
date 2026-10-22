@@ -11,7 +11,7 @@ isiXhosa from Vukuzenzele) this reports:
 Broken down per year for raw and modern.
 
 Usage:
-    python src/tool_metrics.py --variants raw modern modern_asp modern_prefix
+    python src/tool_metrics.py --variants raw modern modern_asp modern_prefix modern_keepnames
 """
 import argparse
 import json
@@ -40,7 +40,7 @@ def oov(texts, lex):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--variants", nargs="+", default=["raw", "modern", "modern_asp", "modern_prefix"])
+    ap.add_argument("--variants", nargs="+", default=["raw", "modern", "modern_asp", "modern_prefix", "modern_keepnames"])
     args = ap.parse_args()
     lex = set(pd.read_parquet("data/modern/lexicon.parquet")["word"])
     toks = {name: AutoTokenizer.from_pretrained(path) for name, path in TOKENISERS.items()}

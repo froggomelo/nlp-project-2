@@ -1,0 +1,28 @@
+{
+ "sources": {
+  "vukuzenzele": {
+   "repo": "dsfsi/vukuzenzele-monolingual",
+   "revision": "b689fe84fdc2ceb01793dfeb9835327825e7a987",
+   "tokens": 85514,
+   "types": 26644
+  },
+  "wikipedia": {
+   "repo": "wikimedia/wikipedia",
+   "revision": "b04c8d1ceb2f5cd4588862100d08de323dccfbaa",
+   "tokens": 297099,
+   "types": 82470
+  },
+  "opus100": {
+   "repo": "Helsinki-NLP/opus-100",
+   "revision": "805090dc28bf78897da9641cdf08b61287580df9",
+   "tokens": 2946429,
+   "types": 246980
+  }
+ },
+ "total_tokens": 3329042,
+ "share_of_tokens": {
+  "vukuzenzele": 0.0256872697911291,
+  "wikipedia": 0.08924459348965859,
+  "opus100": 0.8850681367192124
+ }
+}

@@ -73,6 +73,8 @@ def main():
         km = MiniBatchKMeans(k, random_state=args.seed, n_init=3, batch_size=4096).fit(X[tr])
         sil[k] = float(silhouette_score(X[va_s], km.predict(X[va_s])))
     k_best = max(sil, key=sil.get)
+    if k_best == max(K_GRID):
+        print(f"NOTE: the best number of clusters ({k_best}) is the largest tried; silhouettes {sil}")
     km = MiniBatchKMeans(k_best, random_state=args.seed, n_init=5, batch_size=4096).fit(X[tr])
     df["cluster"] = km.predict(X)
 

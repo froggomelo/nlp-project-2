@@ -21,6 +21,8 @@ Modes:
     python src/normalise.py apply --rules all       # data/processed/chunks_modern.parquet
     python src/normalise.py apply --rules asp       # ablation: data/processed/chunks_modern_asp.parquet
     python src/normalise.py apply --rules prefix    # ablation: data/processed/chunks_modern_prefix.parquet
+    python src/normalise.py apply --rules keepnames # both rules, but likely proper names keep their
+                                                    # 1880s spelling: data/processed/chunks_modern_keepnames.parquet
 """
 import argparse
 import itertools
@@ -49,6 +51,7 @@ COMMON_RE = re.compile(r"\b(" + "|".join(sorted(PREFIX_COMMON, key=len, reverse=
 CAND_PATH = Path("data/processed/normaliser_candidates.parquet")
 THR_PATH = Path("results/normaliser/threshold.json")
 PROVISIONAL = {"tau_o": 2, "tau_v": 5}
+NAME_SHARE = 0.9  # a word capitalised in >= 90% of its occurrences is treated as a likely proper name
 
 
 def load_lexicon(path="data/modern/lexicon.parquet"):
@@ -126,11 +129,18 @@ def make_maps(cand, tau_o, tau_v):
 
 
 def restore_case(orig, new):
+    """Copy the original's capitalisation letter by letter onto the rewrite (which only inserts 'h's):
+    uTixo -> uThixo, TIXO -> THIXO. An inserted h is upper case only in an all-capitals word."""
     if len(orig) > 1 and orig.isupper():
         return new.upper()
-    if orig[0].isupper():
-        return new[0].upper() + new[1:]
-    return new
+    out, j = [], 0
+    for ch in new:
+        if j < len(orig) and ch == orig[j].lower():
+            out.append(orig[j])
+            j += 1
+        else:
+            out.append(ch)
+    return "".join(out)
 
 
 JOIN = "\x00"  # marks a decided prefix join; keeps the two words apart until aspiration has run
@@ -169,13 +179,18 @@ def normalise_text(text, rules, asp_map, common_set, proper_set, log):
 
 
 def capitalised_share(texts):
-    """For each lowercase word type, the share of its occurrences that start with a capital letter."""
+    """For each lowercase word type, the share of its occurrences that start with a capital letter.
+
+    ALL-CAPS occurrences (headlines, mastheads) are left out: they say nothing about whether a word is a
+    name, and counting them as lowercase hid names often set in headlines (Tixo: 85% -> 99%)."""
     tot, cap = Counter(), Counter()
     for t in texts:
         for w in WORD_RE.findall(t):
+            if len(w) > 1 and w.isupper():
+                continue
             lw = w.lower()
             tot[lw] += 1
-            if w[0].isupper() and not w.isupper():
+            if w[0].isupper():
                 cap[lw] += 1
     return {w: cap[w] / n for w, n in tot.items()}
 
@@ -192,7 +207,7 @@ def context(texts, pattern, width=60):
 def make_sheet(cand, texts, n, seed):
     """Stratified sample of word types for hand-checking, split into val/test halves."""
     rng = random.Random(seed)
-    texts = list(texts.sample(frac=1, random_state=seed))[:20000]
+    texts = list(texts.sample(frac=1, random_state=seed))  # all texts, so every word gets a context
     asp = cand[(cand["rule"] == "asp") & (cand["prop_freq"] >= 1)].copy()
     asp["bin"] = pd.cut(asp["prop_freq"], [0, 1, 4, 19, 99, np.inf], labels=False)
     parts = [g.sample(min(len(g), int(n * 0.65) // asp["bin"].nunique()), random_state=seed)
@@ -252,13 +267,16 @@ def thresholds():
     return PROVISIONAL["tau_o"], PROVISIONAL["tau_v"], "provisional (no labelled words yet)"
 
 
-def apply(rules, variant):
+def apply(rules, variant, keep_names=False):
     tau_o, tau_v, src = thresholds()
     cand = pd.read_parquet(CAND_PATH)
     asp_map, common_set, proper_set = make_maps(cand, tau_o, tau_v)
     df = pd.read_parquet("data/processed/chunks.parquet")
     log = Counter()
     xh = df["lang"] == "xh"
+    cap_share = capitalised_share(df.loc[xh, "text"])
+    if keep_names:  # names of peoples, places, people and God keep the authors' spelling
+        asp_map = {w: v for w, v in asp_map.items() if cap_share.get(w, 0) < NAME_SHARE}
     new = [normalise_text(t, rules, asp_map, common_set, proper_set, log) for t in df.loc[xh, "text"]]
     df["text_raw"] = df["text"]
     df.loc[xh, "text"] = new
@@ -267,7 +285,6 @@ def apply(rules, variant):
     df.drop(columns=["text_raw"]).to_parquet(out, index=False)
 
     changes = pd.DataFrame([dict(rule=r, old=o, new=n, count=c) for (r, o, n), c in log.items()])
-    cap_share = capitalised_share(df.loc[xh, "text_raw"])
     res = Path("results/normaliser")
     res.mkdir(parents=True, exist_ok=True)
     changes.sort_values("count", ascending=False).to_parquet(res / f"{variant}_changes.parquet", index=False)
@@ -279,11 +296,12 @@ def apply(rules, variant):
     if len(asp):
         asp = asp.assign(old_l=asp["old"].str.lower())
         asp = asp.assign(cap_share=asp["old_l"].map(cap_share).fillna(0))
-        cap = asp[asp["cap_share"] >= 0.9].groupby("old_l", as_index=False).agg(
+        cap = asp[asp["cap_share"] >= NAME_SHARE].groupby("old_l", as_index=False).agg(
             old=("old", "first"), new=("new", "first"), count=("count", "sum"))
     else:
         cap = asp
-    summary = dict(variant=variant, rules=sorted(rules), tau_o=tau_o, tau_v=tau_v, threshold_source=src,
+    summary = dict(variant=variant, rules=sorted(rules), keep_names=keep_names, tau_o=tau_o, tau_v=tau_v,
+                   threshold_source=src,
                    xh_tokens=n_tok, tokens_changed_by_rule=by_rule,
                    share_tokens_changed=float(changes["count"].sum() / n_tok) if len(changes) else 0.0,
                    share_chunks_changed=float(df.loc[xh, "changed"].mean()),
@@ -299,7 +317,7 @@ def apply(rules, variant):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("mode", choices=["candidates", "sheet", "tune", "apply"])
-    ap.add_argument("--rules", choices=["all", "asp", "prefix"], default="all")
+    ap.add_argument("--rules", choices=["all", "asp", "prefix", "keepnames"], default="all")
     ap.add_argument("--n", type=int, default=240)
     ap.add_argument("--seed", type=int, default=13)
     ap.add_argument("--labels", default="labels/normaliser_labelled.csv")
@@ -322,9 +340,10 @@ def main():
         THR_PATH.write_text(json.dumps(res, indent=1))
         print({k: v for k, v in res.items() if k != "grid_val"})
     else:
-        rules = {"all": {"asp", "prefix"}, "asp": {"asp"}, "prefix": {"prefix"}}[args.rules]
+        rules = {"all": {"asp", "prefix"}, "asp": {"asp"}, "prefix": {"prefix"},
+                 "keepnames": {"asp", "prefix"}}[args.rules]
         variant = "modern" if args.rules == "all" else f"modern_{args.rules}"
-        apply(rules, variant)
+        apply(rules, variant, keep_names=args.rules == "keepnames")
 
 
 if __name__ == "__main__":
