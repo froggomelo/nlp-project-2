@@ -1,0 +1,18 @@
+Rescoring the hand-checked translated pairs (NLP Project 2)
+
+Unzip this folder and open a terminal in it (the folder that contains src/, labels/ and results/).
+Install once:  pip install pandas numpy scikit-learn openpyxl pyarrow
+
+Reproduce the report's numbers exactly (reads labels/verify/pairs_verified.csv):
+    python src/verify_pairs.py score --frozen
+
+After adding or changing labels in the workbooks (labels/verify/pairs_verify_*.xlsx; save and close them):
+    python src/verify_pairs.py score
+This rebuilds labels/verify/pairs_verified.csv and writes results/raw/pair_verification.json.
+
+Labels: 2 = translation, 1 = partial, 0 = different, blank = can't tell (labels/LABELLING_GUIDE.md).
+Type them in the Labels tab. "pairs_verify_Gopolang_part2 reply.xlsx" is the isiXhosa speaker's
+review; its corrections (column E of the Side by side tab, else column D) are already applied to
+pairs_verify_Gopolang_part2.xlsx, with a note on each changed row. pairs_verify_AI_part2.csv holds
+AI-proposed labels: they are only compared with human labels, never counted.
+Do not edit pairs_verified.csv by hand.
