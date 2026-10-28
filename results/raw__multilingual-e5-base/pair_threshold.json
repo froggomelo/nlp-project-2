@@ -1,0 +1,6 @@
+{
+ "threshold": 0.8571373618568346,
+ "kappa": null,
+ "share_kept": 0.24597074138358543,
+ "rule": "provisional: keeps the same share of candidates (24.6%) as LaBSE at 0.55; replace by `pairs.py tune` once pairs are labelled"
+}

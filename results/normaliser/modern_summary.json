@@ -4,6 +4,7 @@
   "asp",
   "prefix"
  ],
+ "keep_names": false,
  "tau_o": 2,
  "tau_v": 5,
  "threshold_source": "provisional (no labelled words yet)",
@@ -15,8 +16,8 @@
  },
  "share_tokens_changed": 0.09146358781902907,
  "share_chunks_changed": 0.9633012033398821,
- "likely_name_rewrites": 12966,
- "likely_name_types": 149,
+ "likely_name_rewrites": 19917,
+ "likely_name_types": 191,
  "top_asp": [
   [
    "apa",
@@ -151,14 +152,29 @@
    2901
   ],
   [
+   "TATU",
+   "THATHU",
+   1668
+  ],
+  [
    "Amafuta",
    "Amafutha",
    1510
   ],
   [
+   "Tixo",
+   "Thixo",
+   1448
+  ],
+  [
    "Irasi",
    "Irhasi",
    1248
+  ],
+  [
+   "ikaya",
+   "ikhaya",
+   1083
   ],
   [
    "Tembu",
@@ -169,6 +185,11 @@
    "Umpatiswa",
    "Umphathiswa",
    714
+  ],
+  [
+   "Umteteleli",
+   "Umthetheleli",
+   636
   ],
   [
    "Mpatiswa",
@@ -196,6 +217,11 @@
    334
   ],
   [
+   "Ngomti",
+   "Ngomthi",
+   275
+  ],
+  [
    "Izalatiso",
    "Izalathiso",
    269
@@ -204,6 +230,11 @@
    "ongapantsi",
    "ongaphantsi",
    245
+  ],
+  [
+   "IRULUNELI",
+   "IRHULUNELI",
+   224
   ],
   [
    "EMTATA",
@@ -221,54 +252,24 @@
    188
   ],
   [
+   "Umteteli",
+   "Umthetheli",
+   162
+  ],
+  [
    "Satana",
    "Sathana",
    159
   ],
   [
-   "Umtumeli",
-   "Umthumeli",
-   134
+   "Utenga",
+   "Uthenga",
+   154
   ],
   [
-   "Umaki",
-   "Umakhi",
-   124
-  ],
-  [
-   "Mzimkulu",
-   "Mzimkhulu",
-   119
-  ],
-  [
-   "komishoni",
-   "khomishoni",
-   99
-  ],
-  [
-   "PUTUKEZI",
-   "PHUTHUKEZI",
-   93
-  ],
-  [
-   "Amalapu",
-   "Amalaphu",
-   90
-  ],
-  [
-   "umcweli",
-   "umchweli",
-   87
-  ],
-  [
-   "Kadi",
-   "Khadi",
-   76
-  ],
-  [
-   "Abesutu",
-   "Abesuthu",
-   72
+   "Abatembu",
+   "Abathembu",
+   144
   ]
  ]
 }

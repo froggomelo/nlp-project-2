@@ -3,6 +3,7 @@
  "rules": [
   "prefix"
  ],
+ "keep_names": false,
  "tau_o": 2,
  "tau_v": 5,
  "threshold_source": "provisional (no labelled words yet)",

@@ -21,7 +21,7 @@ from sklearn.feature_extraction.text import HashingVectorizer
 
 from common import load_usable, run_dir
 
-VARIANTS = ["raw", "modern", "modern_asp", "modern_prefix"]
+VARIANTS = ["raw", "modern", "modern_asp", "modern_prefix", "modern_keepnames"]
 TAG = "FAKE"
 
 
@@ -78,10 +78,13 @@ def main():
     sheet.to_csv(fake_labels, index=False)
     sh("src/pairs.py", "tune", "--model-tag", TAG, "--labels", str(fake_labels), "--min-precision", "0.6")
 
-    sh("src/classify.py", "--variant", "raw", "--model-tag", TAG, "--n-boot", "100")
+    # the stand-in embeddings have far lower similarities than LaBSE (below the tuning grid's 0.30), so
+    # the classifier gets an explicit threshold: the median candidate similarity
+    thr = str(round(float(pd.read_parquet(rd / "pair_candidates.parquet")["sim"].median()), 4))
+    sh("src/classify.py", "--variant", "raw", "--model-tag", TAG, "--n-boot", "100", "--threshold", thr)
     for v in VARIANTS[1:]:
         sh("src/classify.py", "--variant", v, "--model-tag", TAG, "--pairs-from", "raw", "--k-from", "raw",
-           "--n-boot", "100")
+           "--n-boot", "100", "--threshold", thr)
     sh("src/compare.py", "--model-tag", TAG, "--n-boot", "100", "--labels", str(fake_labels))
     sh("src/qualitative.py", "--model-tag", TAG, "--n-perm", "10")
     print("\nSMOKE TEST PASSED: every stage ran end to end. Remove outputs with: python src/smoke_test.py --clean")
