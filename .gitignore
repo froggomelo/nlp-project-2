@@ -11,3 +11,5 @@ results/**/*.parquet
 report/*.aux
 report/*.log
 report/*.out
+embeddings_all.zip
+results_all.zip

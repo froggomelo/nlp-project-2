@@ -14,9 +14,9 @@
   },
   {
    "text": "Imvo isiXhosa (modern)",
-   "oov_tokens": 0.2678273266247631,
-   "fertility_LaBSE": 2.117300387967186,
-   "fertility_XLM-R": 2.523785773460756
+   "oov_tokens": 0.2477500345967586,
+   "fertility_LaBSE": 2.0972001010717047,
+   "fertility_XLM-R": 2.5135473124498264
   },
   {
    "text": "Imvo isiXhosa (modern_asp)",
@@ -26,13 +26,13 @@
   },
   {
    "text": "Imvo isiXhosa (modern_prefix)",
-   "oov_tokens": 0.34174647923872975,
-   "fertility_LaBSE": 2.1373280616640087,
-   "fertility_XLM-R": 2.508841023670069
+   "oov_tokens": 0.31942118936795544,
+   "fertility_LaBSE": 2.1171566285031744,
+   "fertility_XLM-R": 2.498609530592344
   },
   {
    "text": "Modern isiXhosa, Vukuzenzele (reference)",
-   "oov_tokens": 0.0,
+   "oov_tokens": NaN,
    "fertility_LaBSE": 2.184458062701063,
    "fertility_XLM-R": 2.9164312013014815
   }
@@ -118,79 +118,79 @@
   {
    "variant": "modern",
    "year": 1884,
-   "oov_tokens": 0.25348099216371994,
-   "fertility_LaBSE": 2.199002719854941,
-   "fertility_XLM-R": 2.590903596252644
+   "oov_tokens": 0.23854140288680678,
+   "fertility_LaBSE": 2.1843457237836206,
+   "fertility_XLM-R": 2.5824116047144154
   },
   {
    "variant": "modern",
    "year": 1885,
-   "oov_tokens": 0.279140023910272,
-   "fertility_LaBSE": 2.1639277847886116,
-   "fertility_XLM-R": 2.594671869688517
+   "oov_tokens": 0.2612471924192911,
+   "fertility_LaBSE": 2.1476202228669083,
+   "fertility_XLM-R": 2.5862805999618157
   },
   {
    "variant": "modern",
    "year": 1886,
-   "oov_tokens": 0.26431031411436373,
-   "fertility_LaBSE": 2.090252349429102,
-   "fertility_XLM-R": 2.5100290409278667
+   "oov_tokens": 0.24436339997992476,
+   "fertility_LaBSE": 2.0715380869063296,
+   "fertility_XLM-R": 2.500644852901387
   },
   {
    "variant": "modern",
    "year": 1887,
-   "oov_tokens": 0.25323361460409766,
-   "fertility_LaBSE": 2.135263784212614,
-   "fertility_XLM-R": 2.530823838378312
+   "oov_tokens": 0.23401017435540675,
+   "fertility_LaBSE": 2.1162829929739613,
+   "fertility_XLM-R": 2.521513539144747
   },
   {
    "variant": "modern",
    "year": 1888,
-   "oov_tokens": 0.26273818137964305,
-   "fertility_LaBSE": 2.1306832532404774,
-   "fertility_XLM-R": 2.508046890522551
+   "oov_tokens": 0.24344455949481544,
+   "fertility_LaBSE": 2.111757316962286,
+   "fertility_XLM-R": 2.4986883181173747
   },
   {
    "variant": "modern",
    "year": 1889,
-   "oov_tokens": 0.2588951033566587,
-   "fertility_LaBSE": 2.089833581880705,
-   "fertility_XLM-R": 2.4937722590464215
+   "oov_tokens": 0.23821551917928596,
+   "fertility_LaBSE": 2.0685530709337585,
+   "fertility_XLM-R": 2.4826853850311865
   },
   {
    "variant": "modern",
    "year": 1890,
-   "oov_tokens": 0.2673641840833277,
-   "fertility_LaBSE": 2.0871999386456017,
-   "fertility_XLM-R": 2.513110667996012
+   "oov_tokens": 0.24378549464227953,
+   "fertility_LaBSE": 2.063490298335762,
+   "fertility_XLM-R": 2.5008244497277397
   },
   {
    "variant": "modern",
    "year": 1891,
-   "oov_tokens": 0.2704189984215813,
-   "fertility_LaBSE": 2.1462302478754216,
-   "fertility_XLM-R": 2.530145589767611
+   "oov_tokens": 0.25009542315833305,
+   "fertility_LaBSE": 2.1254735889518748,
+   "fertility_XLM-R": 2.5192351199864893
   },
   {
    "variant": "modern",
    "year": 1892,
-   "oov_tokens": 0.2692320564643584,
-   "fertility_LaBSE": 2.1108743378927257,
-   "fertility_XLM-R": 2.530164267075666
+   "oov_tokens": 0.25003691631701214,
+   "fertility_LaBSE": 2.0902467908368765,
+   "fertility_XLM-R": 2.519825044197039
   },
   {
    "variant": "modern",
    "year": 1893,
-   "oov_tokens": 0.2736515253839152,
-   "fertility_LaBSE": 2.1228369999374355,
-   "fertility_XLM-R": 2.528494798921258
+   "oov_tokens": 0.2549347132286565,
+   "fertility_LaBSE": 2.1033037304856643,
+   "fertility_XLM-R": 2.518866464484815
   },
   {
    "variant": "modern",
    "year": 1894,
-   "oov_tokens": 0.27757534281481266,
-   "fertility_LaBSE": 2.089668603287914,
-   "fertility_XLM-R": 2.5043899643071152
+   "oov_tokens": 0.2554390517604152,
+   "fertility_LaBSE": 2.068077013261079,
+   "fertility_XLM-R": 2.493180574733606
   }
  ]
 }
