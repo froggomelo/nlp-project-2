@@ -72,16 +72,15 @@
 {
 \bf
 \looseness=-1
-In its 1884--1894 issues, \emph{Imvo Zabantsundu} printed a large isiXhosa section and a smaller English one,
-not a full translation. This study asks if a multilingual encoder (LaBSE)
-can see this difference once the language signal is removed from its embeddings, and whether modernising the 1880s spelling changes the answer. The newspaper's own translations are
-the control: they say the same thing twice, so a classifier's accuracy on them, the floor, shows
-how well it tells the sections apart with no difference in content. Above that floor the sections' content
-differs, mostly in subject, and the classifier's errors show where they overlap; an isiXhosa speaker's check
-of the pairs confirms it. Modernising
-measurably helps the tool read, bringing translations closer, but its effect on this gap cannot be told apart
-from zero: spelling changes how well the tool reads the paper, not what it finds. It also rewrites names of
-peoples, places and God.
+In its 1884--1894 issues, \emph{Imvo Zabantsundu} published a large section in isiXhosa and a smaller one
+in English. This study asks whether a multilingual encoder (LaBSE) can detect this difference once the
+language signal is removed from its embeddings, and whether modernising the spelling changes this. The
+newspaper's own translations convey the same content in both languages, so a classifier's accuracy on
+them, the floor, shows how well it tells the sections apart without much difference in content.
+Performance above this floor shows that the sections differ in content, mainly in subject matter.
+Modernising the spelling helps the model read, bringing translations closer, but does not
+detectably change the content difference between the sections: spelling affects how well the model reads
+the newspaper, not what it finds.
 }
 \begin{quote}
 \small
@@ -92,34 +91,37 @@ historical text normalisation; multilingual sentence embeddings; isiXhosa
 \section{Introduction} \label{Intro}
 \looseness=-1
 \emph{Imvo Zabantsundu}, founded by John Tengo Jabavu in 1884, was the first African-owned newspaper in
-South Africa, printed mainly in isiXhosa with an English translation of the editorial and some other items
-\citep{schoots}. NLP tools are built mostly from modern, high-resource text \citep{joshi}, and invite
-researchers to ``clean'' the isiXhosa by modernising it (\emph{Tixo}, \emph{umteto} $\to$
-\emph{Thixo}, \emph{umthetho}).
+South Africa. It published mainly in isiXhosa, with some English translations and other items
+\citep{schoots}. NLP tools are mostly developed from modern text in high-resource languages
+\citep{joshi}, which gives researchers a reason to modernise the spelling of isiXhosa texts, for example
+changing \emph{Tixo} and \emph{umteto} to \emph{Thixo} and \emph{umthetho}. Historical normalisation is
+judged by spelling accuracy or task scores \citep{bollmann}, rarely by whether it changes a conclusion,
+making it a ``forking path'' \citep{gelman}.
 
-\textbf{Research question.} \emph{With the language signal removed from a multilingual encoder's
-embeddings, can a classifier still tell Imvo's sections apart by content, and does modernising the spelling
-change how large that difference looks?}
-\textbf{H1:} on a test set, a classifier predicting each chunk's section (a chunk is a 60-word piece of a
-page) has a higher balanced accuracy (BA, the mean of its accuracy on each section; chance is 0.5) on all
-chunks than on translated pairs, which are chunks matched to their translation in the other section. Pairs
-share their content, so their BA, the floor, is what the classifier achieves without content. The gap
-$\Delta$, all-chunk BA minus the floor, measures the content difference. H1 holds if the 95\% CI of $\Delta$,
-resampled over test issues, lies above zero. \textbf{H2:} modernising lowers the
-floor, as the encoder reads modern text better, but leaves $\Delta$ unchanged within $\pm$0.02
-(measurement invariance); otherwise, cleaning changes the conclusion.
+\textbf{Research question.} \emph{After removing the language signal from a multilingual encoder's
+embeddings, can a classifier still distinguish between Imvo's sections based on their content, and does
+modernising the spelling change the size of this difference?}
+\textbf{H1:} A classifier predicting which section a chunk (a 60-word piece of a page) comes from should
+achieve a higher balanced accuracy (BA, its mean accuracy over the two sections; chance is 0.5) on all test
+chunks than on translated pairs, which are chunks matched to their translation in the other section. Each
+pair shares the same content, so its BA is the floor: how well the classifier tells the sections apart
+without any difference in content. The difference between the two, named $\Delta$, measures the content
+difference. H1 is supported if the 95\% confidence interval (CI) of $\Delta$, resampled over test
+issues, lies above zero. \textbf{H2:} Modernising the spelling should lower the floor, since the encoder
+reads modern text better, while leaving $\Delta$ unchanged within $\pm$0.02 (measurement invariance). Beyond
+this range, modernising changes the conclusion.
 
 \subsubsection{Background}
 \looseness=-1
-The archive was OCR-corrected by first-language isiXhosa speakers and deliberately not spell-checked,
-because 1880s spelling differs from today's \citep{schoots}. Neither spelling is neutral: written isiXhosa
-was first shaped by missionary grammars made for learners rather than speakers \citep{maseko}, and
-low-resourcedness is also a question of who builds tools and for whom \citep{nekoto}. Historical normalisation is judged by spelling accuracy or task scores
-\citep{bollmann}, rarely by whether it changes a conclusion, making it a ``forking path'' \citep{gelman}. LaBSE \citep{labse} was trained to match translations in 109 languages,
-isiXhosa among them, but its embeddings still identify the language. This can be removed by subtracting
-each language's average embedding \citep{libovicky}, which also removes any average content difference,
-or by projecting out a few directions \citep{lir,inlp}. As in control-based probing \citep{hewitt}, the
-paper's own translations are the control.
+\textbf{Historical isiXhosa.} The archive's machine-read (OCR) text was corrected by
+native isiXhosa speakers and deliberately not spell-checked, as 1880s spelling differs from today's
+\citep{schoots}. Spelling is not neutral: written isiXhosa was first shaped by missionary grammars made for
+learners rather than speakers \citep{maseko}, and low-resourcedness is also a question of who builds tools
+and for whom \citep{nekoto}.
+\textbf{Removing language.} LaBSE \citep{labse} was trained to match translations in 109
+languages, isiXhosa among them, but its embeddings still identify the language. This signal can be removed
+by subtracting each language's average embedding (mean-centring; \citealp{libovicky}), which also removes average content differences, or by projecting out a few directions \citep{lir,inlp}. As with control tasks \citep{hewitt},
+the paper's own translations are the control.
 
 \section{Methods}
 \looseness=-1
@@ -127,125 +129,99 @@ paper's own translations are the control.
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{figures/fig_results.pdf}
-  \caption{\looseness=-1 (a) Simulated data, known gap (5 seeds, $\pm$std.; dashed: 40\% false pairs). (b) Test issues,
-  LaBSE: each line runs from the floor (open) to all-chunk BA (filled); its length is $\Delta$.}
+  \caption{\looseness=-1 (a) Simulation: gap found vs gap planted (5 seeds, $\pm$std.; dashed: 40\% false pairs); pair removal is this method, mean-centring subtracts each language's mean. (b) Test issues, LaBSE: each line runs from the floor (open) to all-chunk BA (filled); its length is $\Delta$.}
   \label{fig:res}
 \end{figure*}
 
-\textbf{Data.} The 511 of 517 Imvo issues with at least 1{,}000 words per language are used: 3.9M
-isiXhosa and 1.5M English words. Boilerplate (text repeated across issues) and chunks in the wrong language are dropped, leaving 45{,}465
-isiXhosa and 22{,}927 English chunks. Issues are split 357/77/77 (train/validation/test), stratified
-by year.
+\textbf{Data.} Of the 517 Imvo issues, the 511 with at least 1{,}000 words per language are used. Chunks in the wrong language and text repeated across
+issues are left out, leaving 45{,}465 isiXhosa and 22{,}927 English chunks. Issues are split 357/77/77
+(train/validation/test), stratified by year.
 
-\textbf{Modernisation.} A word list is built from 3.3M tokens of modern isiXhosa (mostly OPUS-100 \citep{opus}; also
-Wikipedia and Vukuzenzele \citep{vuk}). \emph{Aspiration} adds the missing \emph{h}
-after \emph{t, p, k, r, c, q, x} only if the old form is almost absent from the list ($\leq$2 uses) and the
-new form is present ($\geq$5). \emph{Prefix} joins prefixes written apart (\emph{e Palamente}$\to$\emph{ePalamente})
-only if the joined form is in the list ($\geq$5 uses). Thresholds were fixed in advance to favour precision. The rules rewrite 9.1\% of the 3.7M
-isiXhosa words, including 191 likely names (capitalised in $\geq$90\% of uses).
+\textbf{Spelling modernisation.} A word list is built from 3.3M tokens of modern isiXhosa (mostly OPUS-100
+\citep{opus}; also Wikipedia and Vukuzenzele \citep{vuk}). \emph{Aspiration} restores the \emph{h} that
+1880s spelling left out after \emph{t, p, k, r, c, q, x}, but only when
+the old spelling is almost absent from the modern word list ($\leq$2 uses) and the new one is common in it
+($\geq$5). \emph{Prefix} joins prefixes written apart (\emph{e Palamente}$\to$\emph{ePalamente})
+only when the joined form is in the list ($\geq$5 uses).  The rules rewrite 9.1\% of the 3.7M isiXhosa words, including 191
+likely names (capitalised in $\geq$90\% of uses). \emph{Modern} applies both rules; \emph{raw} is the original.
 
-\textbf{Translated pairs.} Each chunk is embedded with LaBSE and, as a check,
-multilingual-E5 \citep{e5}. Within each issue, an isiXhosa and an English chunk that are each other's closest
-match by cosine similarity form a pair if their similarity is $\geq$0.55 (311 test pairs; 10{,}289 test chunks). A fluent isiXhosa speaker checked 51
-of 100 sampled test pairs (27 first labelled with AI help): 31\% were translations, 29\% partial and 39\% different,
-so the threshold is loose. Names and numbers support it, as translation keeps them: 25.7\% of
-kept pairs share three or more, against 2.9\% of rejected candidates. E5 (similarities 0.83--0.88) keeps LaBSE's share.
+\textbf{Embeddings and translated pairs.} Each chunk is embedded with LaBSE and, for comparison,
+multilingual-E5 \citep{e5}. Within each issue, an isiXhosa and an English chunk that are each other's
+closest match by cosine similarity form a pair if their similarity is $\geq$0.55 (311 test pairs; 10{,}289
+test chunks). Of 100 sampled test pairs, a fluent isiXhosa speaker labelled 24 herself and reviewed 27 that
+a team member had labelled with AI translations and suggested labels. Of these 51, 31\% were translations,
+29\% partial and 39\% different, suggesting that the 0.55 threshold is too loose. Her own labels find more
+pairs different (54\% vs 26\%), so the reviewed ones may lean towards the AI, though $\Delta$ is similar (0.24, 0.26).
 
-\textbf{Measuring content.} A pair says the same thing twice, so the difference between its two embeddings
-is mostly language. These differences are stacked for training pairs and their top $k$ directions
-are projected out of every embedding:
+\textbf{Removing the language signal (pair removal).} Pair differences, which are mostly language, are stacked for training pairs and their top $k$
+directions are projected out of every embedding:
 \begin{equation}
 D=\big[\,x^{\mathrm{xh}}_i-x^{\mathrm{en}}_i\,\big]_{i\in P},\qquad
 \tilde{x}=x-V_k^{\top}V_k\,x,
 \end{equation}
-where $V_k$ holds the top-$k$ right singular vectors of $D$. A class-balanced logistic regression is fitted
-on training issues and scored on test issues as in H1, giving $\Delta=\BA_{\mathrm{all}}-\BA_{\mathrm{pairs}}$.
-On validation issues, $k\in\{0,1,2,4,\dots,64\}$ is set to the smallest value with a floor $\leq$0.55 (else
-the largest), and the regularisation strength $C\in\{10^{-2},\dots,10^{3}\}$ is tuned (E5 picks the largest). A cosine
-$k$-nearest-neighbour (kNN) classifier, which fits no weights, repeats the measurement. For H2, each spelling variant keeps the pairs and $k$ chosen on the
-original text, so only the spelling changes; it is equivalent to raw if the 90\% CI of its change in
-$\Delta$ (1{,}000 resamples of test issues) lies within $\pm$0.02.
-Topics are $k$-means clusters of $\tilde{x}$, fitted without section labels (the checks below use a refit of them). A \emph{topic-only rule}
-guesses the isiXhosa section whenever a chunk's topic is mostly isiXhosa in training issues; this and the
-error checks were added after the main results, so they are exploratory. \textbf{Synthetic check.} To
-test the method on a known answer, embeddings are simulated as a topic vector plus a language vector.
-English chunks draw topics evenly; a share $\delta$ of isiXhosa chunks draws from only a quarter of them,
-the \emph{planted} gap. Pairs copy isiXhosa content into English. A \emph{content-only} classifier, given the
-topic vectors alone, measures the true gap. Language is added, as the method assumes, so this checks the method, not LaBSE.
+where $V_k$ holds the top-$k$ right singular vectors of $D$. A logistic regression, weighted so both
+sections count equally, is trained on training issues to predict each chunk's section; the difference
+between its BA on all test chunks and on test pairs gives $\Delta$. Two settings are chosen on validation
+issues: the number of directions removed, $k$, is the smallest value in $\{0,1,2,4,\dots,64\}$ that brings
+the floor to 0.55 or below (64 if none does, as here), and the regularisation strength $C\in\{10^{-2},\dots,10^{3}\}$
+is the one with the highest BA. \textbf{Spelling effects.} For H2, each spelling variant keeps the pairs and $k$ chosen on the original
+text, so only the spelling changes. It is equivalent to raw if the 90\% CI of its change in $\Delta$ lies within $\pm$0.02. \textbf{Topic analysis.} Topics are $k$-means clusters of $\tilde{x}$, fitted without section labels. To
+test how much of the gap is subject matter alone, a \emph{topic-only rule} assigns a chunk to the isiXhosa
+section if its topic has an isiXhosa share in training issues above the overall share (as in Figure~S1,
+but refitted). This and the check of where errors fall were performed after the main results, so they are
+exploratory. \textbf{Synthetic check.} Each simulated chunk is a topic vector plus a
+language vector. A content difference is planted on purpose: simulated
+English chunks use all topics evenly, while a share $\delta$ of simulated isiXhosa
+chunks use only a quarter of them. Simulated pairs copy isiXhosa content into English, and a classifier on topic vectors alone measures the true difference. This checks the language removal and the floor, not LaBSE.
 
-\setlength{\belowcaptionskip}{-7pt}
-\begin{table}[t]
-\centering\small
-\captionsetup{font=sf, width=0.95\linewidth, skip=7pt}
-\caption{\looseness=-1 Section classifier on test issues, LaBSE (BA).}
-\label{tab:main}
-\begin{tabular}{@{}lcccc@{}}
-\toprule
-Variant & All & Floor & $\Delta$ & $\Delta-\Delta_\mathrm{raw}$ (90\% CI)\\
-\midrule
-raw & .786 & .590 & .196 & -- \\
-modern & .784 & .571 & .214 & $+$.018 ($-$.003, $+$.037)\\
-aspiration only & .783 & .569 & .213 & $+$.017 ($-$.001, $+$.038)\\
-prefix only & .786 & .600 & .187 & $-$.009 ($-$.024, $+$.006)\\
-\bottomrule
-\end{tabular}
-\end{table}
-\setlength{\belowcaptionskip}{0pt}
 
 \section{Results}
 \looseness=-1
-\textbf{The method finds planted gaps.} On simulated data (Figure~\ref{fig:res}a) the planted gap is recovered
-(0.097 vs the true 0.099 at $\delta{=}0.4$); with 40\% false pairs it is underestimated (0.045 vs 0.059), not inflated.
+\textbf{The method finds planted gaps.} In simulation (Figure~\ref{fig:res}a) the planted gap is recovered
+(0.097 vs true 0.099 at $\delta{=}0.4$); with 40\% false pairs (recorded pairs that are not in fact
+translations) it shrinks (0.045 vs a true 0.059) rather than inflates.
 
-\textbf{The sections differ (H1).} Removing one direction drops the validation floor from 0.97 to 0.59; more
-barely help, so the fallback rule picks $k{=}64$. The classifier then gives both halves of 201 of the 311
-test pairs the same section, still splits 83 and swaps 27; the floor is above 0.5 only because 83 outnumber 27.
-Against it, $\Delta$ is 0.196 (0.167--0.224), supporting H1, and it stays positive in every check in
-Table~S1 (smallest with kNN on E5: 0.046). On 31 checked full or partial
-translations, the floor is 0.53 and $\Delta$ is 0.254 (0.134--0.363); on full translations it is at
-chance (0.50), so the main $\Delta$ is cautious (Figure~S1).
+\textbf{The sections differ in content, not just language (H1).}  Of 311 test pairs, the classifier gives both halves one label for 201 (it cannot tell a text from its translation), correctly tells them apart for 83 and labels both the
+wrong way round for 27; the floor exceeds 0.5 only because 83 outnumber 27. Above this floor, $\Delta$ is 0.196 (0.167--0.224), supporting H1, and is positive in every Table~S2 setting (smallest 0.046) and both periods (Figure~\ref{fig:res}b). On 16 hand-checked full translations the floor is 0.50, so loose pairs raise the floor and the main $\Delta$ errs low.
 
-\textbf{The gap is mostly subject matter.} The topic-only rule reaches a BA of 0.661 (0.646--0.674) on test
-issues, but only 0.523 on translated pairs, which share a topic. The classifier's mistakes follow it: chunks on a topic the other section usually covers are 34\% of test
-chunks but 63\% of errors. Within a single topic the classifier still reaches 0.73.
+\textbf{The BA gap is mostly subject matter.} A topic-only rule
+reaches 0.661 on test chunks, but only 0.523 on translated pairs, whose two halves share a topic. Topic
+accounts for about 70\% of the gap (0.138 of 0.196). The classifier also errs mostly on chunks about topics
+the other section usually covers: 34\% of chunks, but 63\% of errors. Topic is not everything, though: within one topic the classifier still reaches 0.73.
 
-\textbf{Spelling helps the tool read but does not detectably move $\Delta$ (H2).} Modernising measurably
-helps: aspiration cuts words missing from modern text from 31.5\% to 24.5\%, and translated pairs move closer
-(similarity $+$0.005, 95\% CI 0.003--0.007). Its effect on $\Delta$ cannot be told apart from zero ($+$0.018,
-90\% CI $-$0.003 to $+$0.037; Table~\ref{tab:main}; E5 behaves the same), and all-chunk BA is unchanged
-($-$0.002). This null is informative but not proof of equivalence: every CI crosses $\pm$0.02 (10\% of
-$\Delta$), so a change that size cannot be ruled out. The floor's 0.019 fall is within noise ($-$0.043 to 0.005).
+\textbf{Spelling helps the tool read but does not detectably move $\Delta$ (H2).} Aspiration cuts words
+missing from modern text from 31.5\% to 24.5\%, and translated pairs move closer (similarity $+$0.005). Its effect on $\Delta$ cannot be told apart from zero ($+$0.018, 90\% CI $-$0.003 to
+$+$0.037; Figure~\ref{fig:res}b, Table~S1; likewise for E5), and the floor's fall (0.019) is within noise. Every CI crosses $\pm$0.02, so H2 is neither confirmed nor rejected.
 
 \section{Discussion}
 \looseness=-1
-\textbf{The classifier sorts by subject.} That the sections differ is expected \citep{schoots}; what is
-new is measuring it apart from language. LaBSE only embeds each chunk;
-the linear classifier on top learns which subjects each section printed. The English
-section leaned towards colonial policy: commissions, land laws and liquor licensing; the isiXhosa section
-towards community life: association meetings, sport, marriage, land sales, market prices
-(Figure~S2).
+\textbf{Subject matter drives the difference.} The sections are known to differ \citep{schoots}, so what
+is new is measuring how much once language is removed, and showing that cleaning the spelling does not
+detectably change the answer. The English section leans towards colonial policy: commissions, land laws
+and liquor licensing; the isiXhosa section towards community life: association meetings, sport, marriage,
+land sales and market prices (Figure~S1). The classifier errs where one section printed what the other
+usually did: 23 of 24 English land-sale notices go to the isiXhosa section, and most isiXhosa land-law and
+liquor articles go to the English one. What remains within a topic (0.73) may be how each section catered
+for its readers.
 
-\textbf{Its mistakes are evidence, not noise.} The classifier errs where one section printed what the other
-usually did, so its errors map where the sections overlapped: 23 of 24 English land-sale notices go to
-the isiXhosa section, and most isiXhosa liquor-licensing and land-law articles to the English one.
+\textbf{Translation is an imperfect control.} Most pairs land
+in the same section, yet the isiXhosa speaker noted the saying \emph{isiXhosa asitolikwa}, ``isiXhosa
+cannot be translated'': even good translations adapt, turning ``a feather in its cap'' into the
+\emph{indwe}, the crane feather of honour (Y.~Siko, pers.\ comm.). This suggests that some meaning relies
+on cultural identity. If LaBSE misses this meaning too, the classifier cannot use it to tell more pairs
+apart, so the floor controls content only roughly.
 
-\textbf{Cleaning helps reading but costs the record.} Modernising brings
-translations closer without changing all-chunk BA, which content sets. But the same rules rewrite how people named
-themselves in 1884: a people (\emph{Xosa}), a community (\emph{Tembu}), a town (\emph{Mtata}) and God
-(\emph{Tixo}). The tools also read English more easily (2.11 LaBSE tokens per isiXhosa word, 1.26 per
-English), which tempts researchers to study only the English half; who builds them, and for whom, still
-shapes what an archive can show \citep{nekoto}. Limits remain. Only 51 pairs were checked
-by hand, 39\% were not translations, and no person checked the rewrites. The speaker who checked them
-noted that \emph{isiXhosa asitolikwa}, ``isiXhosa cannot be translated'': even good translations adapt, turning
-``a feather in its cap'' into the \emph{indwe}, the crane feather of honour (Y.~Siko, pers.\ comm.), so the
-floor controls content only approximately. Topic checks
-use LaBSE only; the method measures what was printed, not why. Archive studies should report this floor for both spellings.
+\textbf{Modernisation and the historical record.} Modernising is not needed for this conclusion, yet its rules rewrite how people named themselves in 1884:
+a people (\emph{Xosa}), a community (\emph{Tembu}), a town (\emph{Mtata}) and God (\emph{Tixo}). The tools
+read English more easily too (2.11 vs 1.26 LaBSE tokens per word), which may tempt researchers to study only the English half \citep{nekoto}. \textbf{Limitations.} Only 51 pairs were hand-checked and no one checked the rewrites. Topic checks use
+LaBSE only, and the method measures what was printed but cannot say why. Future archive studies should
+report the floor under both spellings.
 
 \section{Contribution Statements}
 We, Gopolang Mohlakola, Tawananyasha Kadango and Lily de Melo, worked together fairly on this project.
 
 \section*{Acknowledgements}
-The authors thank Yonela Siko, an isiXhosa speaker, for checking the 51 translated pairs used to verify the
+The authors thank Yonela Siko, a fluent isiXhosa speaker, for checking the 51 translated pairs used to verify the
 floor.
 
 \bibliographystyle{apacite}
@@ -264,55 +240,51 @@ floor.
 \section*{Supplementary material}
 \setcounter{figure}{0}
 \renewcommand{\thefigure}{S\arabic{figure}}
-A table and two figures that support claims in the body, from the saved results in \texttt{results/}.
+Two tables and a figure that support claims in the body, from the saved results in \texttt{results/}.
 
 \begin{table}[h!]
-\centering\small
 \renewcommand{\thetable}{S1}
-\caption{The gap holds across checks. Test issues, LaBSE, original spelling unless stated; 95\% CIs
-resampled over test issues where given. Anchor pairs are mutual best matches on $\geq$3 shared names or
-numbers, found without the encoder. The topic-only rule uses no classifier, only a refit of the
-Figure~S2 topics (same code and seed; cluster sizes differ slightly from the saved run).}
-\begin{tabular}{@{}lccc@{}}
+\centering\small
+\captionsetup{font=sf, width=0.95\linewidth, skip=7pt}
+\caption{\looseness=-1 Section classifier on the test set, LaBSE (balanced accuracy). Spelling variants barely move $\Delta$. The last column is each variant's change in $\Delta$ from the original raw text, with its 90\% CI in brackets: the true change likely lies between the lower and upper ends (1{,}000 resamples of test issues).}
+\label{tab:spelling}
+\begin{tabular}{@{}lcccc@{}}
 \toprule
-Setting & All & Floor & $\Delta$ (95\% CI)\\
+Variant & All & Floor & $\Delta$ & $\Delta-\Delta_\mathrm{raw}$ (90\% CI: low, high)\\
 \midrule
-Main result ($k{=}64$) & .786 & .590 & .196 (.167, .224)\\
-Any $k$ from 1 to 64 & & & .196 to .221\\
-E5 encoder & .877 & .618 & .258 (.216, .304)\\
-Stricter pairs (similarity $\geq$0.65) & .888 & .725 & .163 (.112, .210)\\
-Anchor pairs (no encoder) & .786 & .627 & .159 (.128, .191)\\
-More similar half of pairs & .786 & .54 & .244\\
-Page 2 only & .701 & .496 & .205 (.145, .397)\\
-kNN classifier & .851 & .703 & .149\\
-kNN classifier, E5 & .599 & .553 & .046\\
-Topic-only rule & .661 & .523 & .138\\
-Hand-checked, full or partial (31 pairs) & .786 & .532 & .254 (.134, .363)\\
-Hand-checked, full translations (16 pairs) & .786 & .500 & .286 (.142, .412)\\
+raw & .786 & .590 & .196 & -- \\
+modern & .784 & .571 & .214 & $+$.018 ($-$.003, $+$.037)\\
+aspiration only & .783 & .569 & .213 & $+$.017 ($-$.001, $+$.038)\\
+prefix only & .786 & .600 & .187 & $-$.009 ($-$.024, $+$.006)\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.48\textwidth]{figures/supp_floor_similarity.png}
-  \caption{Loose pairs raise the floor. The floor (balanced accuracy on translated pairs) for each
-  quarter of test pairs, ranked by similarity, with 95\% CIs resampled over test issues; LaBSE blue, E5 orange.
-  The closer a pair is to an exact translation, the closer the classifier is to chance (0.5): much of the floor
-  comes from loose pairs, which differ in content, rather than from language the removal missed. The hand
-  check agrees: on the 16 pairs an isiXhosa speaker judged full translations, the floor is 0.50 (Table~S1).}
-\end{figure}
+\begin{table}[h!]
+\renewcommand{\thetable}{S2}
+\centering\small
+\captionsetup{font=sf, width=0.95\linewidth, skip=7pt}
+\caption{\looseness=-1 The gap holds across checks. All rows use the test set, LaBSE and original spelling unless otherwise stated. The brackets give the 95\% CI, where available: the true gap likely lies between the lower and upper ends (resampled over test issues). kNN is a cosine $k$-nearest-neighbour classifier, which fits no weights. The topic-only rule uses topics alone, refitted from Figure~S1 (using the same code and seed; cluster sizes differ slightly).}
+\label{tab:checks}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Setting & All & Floor & $\Delta$ (95\% CI: low, high)\\
+\midrule
+Main result ($k{=}64$) & .786 & .590 & .196 (.167, .224)\\
+E5 encoder & .877 & .618 & .258 (.216, .304)\\
+kNN classifier & .851 & .703 & .149\\
+kNN classifier, E5 & .599 & .553 & .046\\
+Topic-only rule & .661 & .523 & .138\\
+Hand-checked full translations (16 pairs) & .786 & .500 & .286 (.142, .412)\\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\begin{figure}[h!]
+
+\begin{figure}[H]
   \centering
-  \includegraphics[width=0.62\textwidth]{figures/fig_topics.pdf}
-  \caption{What differs between the sections. Share of each topic's chunks that are isiXhosa, for the 30
-  topics with more than one chunk (topics are $k$-means clusters of the language-removed LaBSE embeddings
-  $\tilde{x}$, fitted on training issues without section labels; chunk counts in brackets). Blue: more isiXhosa
-  than its share of all chunks (0.66); orange: less. Topic names are the authors' reading of each cluster's
-  most distinctive words; \emph{names} clusters hold mostly personal and place names, and numbered clusters
-  have no single clear subject. The topics overlap (silhouette 0.008), so they describe the content rather than
-  measure it.}
+  \includegraphics[width=0.6\textwidth]{figures/fig_topics.pdf}
+  \caption{What each section usually wrote about. The share of each topic's chunks that are isiXhosa, for 30 topics, each with its chunk count. Blue topics are more isiXhosa than the overall share (0.66), while orange ones are less. The topics are $k$-means clusters of the language-removed embeddings, named by the authors from each cluster's most distinctive words (those most over-represented in it compared with the rest). Clusters labelled \emph{names} hold mostly personal and place names, and numbered ones have no clear subject. The topics overlap (silhouette score 0.008, where 0 means fully overlapping), so they describe content rather than measure it.}
 \end{figure}
 
 
