@@ -1,0 +1,53 @@
+k=32, train isiXhosa share 0.665, 10289 test chunks, 622 in pairs
+
+1. Topic-only rule vs classifier (BA)
+   topic only all=0.661 [0.646, 0.674]  pairs=0.523  gap=0.138
+   classifier all=0.786 [0.773, 0.798]  pairs=0.590  gap=0.196
+   classifier agrees with the topic-only rule on 71.7% of test chunks
+
+2. Classifier errors for chunks whose topic is typical vs atypical of their own section
+   English  section, topic typical : n= 2395  error rate=0.131
+   English  section, topic atypical: n= 1214  error rate=0.320
+   isiXhosa section, topic typical : n= 4393  error rate=0.119
+   isiXhosa section, topic atypical: n= 2287  error rate=0.453
+   atypical-topic chunks are 34.0% of test chunks but 63.0% of errors
+   error rate atypical minus typical = +0.284 [+0.264, +0.305]
+
+3. Language left once topic is fixed: classifier BA within each topic (topics with >=30 chunks per section)
+   24 topics; chunk-weighted mean within-topic BA = 0.730 (classifier overall 0.786)
+
+4. Per-topic table (sorted by isiXhosa lean)
+
+| topic                    |   lean |   n_xh |   n_en |   acc_xh |   acc_en |      ba |
+|:-------------------------|-------:|-------:|-------:|---------:|---------:|--------:|
+| councils, commissions    |  0.381 |    144 |    264 |    0.542 |    0.913 |   0.727 |
+| liquor licensing         |  0.391 |    189 |    343 |    0.386 |    0.91  |   0.648 |
+| refit 2                  |  0.395 |    198 |    236 |    0.439 |    0.881 |   0.66  |
+| legislation, land        |  0.446 |    201 |    294 |    0.413 |    0.881 |   0.647 |
+| refit 30                 |  0.456 |    174 |    240 |    0.523 |    0.908 |   0.716 |
+| names (cluster 31)       |  0.51  |    258 |    268 |    0.523 |    0.821 |   0.672 |
+| Kimberley, Hofmeyr       |  0.547 |    236 |    215 |    0.597 |    0.851 |   0.724 |
+| names (cluster 3)        |  0.569 |    208 |    149 |    0.644 |    0.832 |   0.738 |
+| refit 8                  |  0.607 |    199 |     96 |    0.638 |    0.802 |   0.72  |
+| refit 15                 |  0.621 |    275 |    157 |    0.64  |    0.879 |   0.759 |
+| refit 1                  |  0.623 |    205 |    133 |    0.61  |    0.767 |   0.688 |
+| religion                 |  0.669 |    216 |    123 |    0.75  |    0.732 |   0.741 |
+| refit 21                 |  0.672 |    237 |    128 |    0.73  |    0.727 |   0.728 |
+| refit 28                 |  0.694 |    250 |    102 |    0.808 |    0.755 |   0.781 |
+| health, medicine         |  0.713 |    201 |    127 |    0.841 |    0.756 |   0.798 |
+| refit 27                 |  0.717 |    194 |     82 |    0.784 |    0.744 |   0.764 |
+| names (cluster 24)       |  0.739 |    235 |     95 |    0.791 |    0.695 |   0.743 |
+| land rates               |  0.762 |    225 |    110 |    0.889 |    0.655 |   0.772 |
+| letters to the editor    |  0.766 |    389 |    151 |    0.835 |    0.788 |   0.812 |
+| women, marriage          |  0.817 |    260 |     40 |    0.927 |    0.6   |   0.763 |
+| refit 26                 |  0.842 |    223 |     52 |    0.919 |    0.577 |   0.748 |
+| sport                    |  0.859 |    182 |     41 |    0.923 |    0.585 |   0.754 |
+| cluster 7                |  0.89  |    358 |     41 |    0.902 |    0.585 |   0.744 |
+| association meetings     |  0.89  |    240 |     19 |    0.942 |    0.263 | nan     |
+| refit 10                 |  0.895 |    265 |     43 |    0.932 |    0.651 |   0.792 |
+| cluster 6                |  0.908 |    167 |     20 |    0.952 |    0.5   | nan     |
+| meeting and show reports |  0.918 |    238 |     16 |    0.941 |    0.375 | nan     |
+| land sales, surveys      |  0.956 |    276 |     24 |    0.982 |    0.042 | nan     |
+| market prices            |  0.999 |    205 |      0 |    0.995 |  nan     | nan     |
+| tables                   |  1     |     25 |      0 |    1     |  nan     | nan     |
+| refit 23                 |  1     |      7 |      0 |    1     |  nan     | nan     |

@@ -188,6 +188,7 @@ def main():
         sheet = make_sheet(pd.read_parquet(cand_path), anch, df, emb, args.n, args.seed)
         print(f"{len(anch)} embedding-free anchor pairs available in val/test issues")
         out = Path("labels/pairs_to_label.csv")
+        out.parent.mkdir(exist_ok=True)
         sheet.to_csv(out, index=False, encoding="utf-8-sig")
         print(f"wrote {len(sheet)} pairs to {out} ({sheet['source'].value_counts().to_dict()})")
     elif args.mode == "match":

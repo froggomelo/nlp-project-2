@@ -114,3 +114,39 @@ for run, thr in [("raw", 0.55), ("raw__multilingual-e5-base", 0.8571373618568346
         diffs.append(gap(l_) - gap(e))
     lo, hi = np.percentile(diffs, [2.5, 97.5])
     print(f"   change in gap (1890-94 minus 1884-89): {res['1890-94'] - res['1884-89']:+.3f}, 95% CI [{lo:+.3f}, {hi:+.3f}]")
+
+
+# 5-6 run after checks 1-4 so the earlier numbers keep their random draws
+from pairs import anchor_pairs  # noqa: E402
+
+chunks = pd.read_parquet(f"{root}/data/processed/chunks.parquet")
+test_chunks = chunks[chunks.usable & (chunks.split == "test")].reset_index(drop=True)
+anch = anchor_pairs(test_chunks)
+anch_ids = set(anch.xh_id) | set(anch.en_id)
+
+for run, thr in [("raw", 0.55), ("raw__multilingual-e5-base", 0.8571373618568346)]:
+    p = pd.read_parquet(f"{root}/results/{run}/stage1_test_predictions.parquet")
+    print(f"\n######## {run}: checks 5-6")
+
+    # 5. floor on embedding-free pairs (mutual best overlap of specific names/numbers, >= 3 shared):
+    #    embedding pairs are chosen for being close in the same space the classifier reads, which could
+    #    push their floor down; anchor pairs are chosen without the encoder
+    print("\n5. floor on embedding-free anchor pairs")
+    emb_ids = set(p.loc[p.in_pair, "chunk_id"])
+    for name, ids in [("anchor pairs", anch_ids), ("anchor pairs not in embedding pairs", anch_ids - emb_ids)]:
+        mask = lambda d: d.chunk_id.isin(ids)
+        fl = lambda d: ba(d[mask(d)])
+        gp = lambda d: ba(d) - ba(d[mask(d)])
+        lo, hi = boot(p, fl)
+        glo, ghi = boot(p, gp)
+        print(f"   {name}: chunks={mask(p).sum()} floor={fl(p):.3f} [{lo:.3f}, {hi:.3f}] "
+              f"gap={gp(p):.3f} [{glo:.3f}, {ghi:.3f}]")
+    print(f"   {len(anch)} anchor pairs; {len(anch_ids & emb_ids)} of their {len(anch_ids)} chunks are in embedding pairs")
+
+    # 6. page 2 alone, where most pairs sit
+    print("\n6. page 2 alone")
+    p2 = p[p.page == 2]
+    gap = lambda d: ba(d) - ba(d[d.in_pair])
+    lo, hi = boot(p2, gap)
+    print(f"   chunks={len(p2)} pair chunks={p2.in_pair.sum()} all={ba(p2):.3f} floor={ba(p2[p2.in_pair]):.3f} "
+          f"gap={gap(p2):.3f} [{lo:.3f}, {hi:.3f}]")

@@ -86,8 +86,8 @@ def main():
         print(f"\nNo labelled pairs yet: {a.model_tag} threshold matched to LaBSE at {a.threshold}")
     else:
         sh("src/pairs.py", "sheet", *tag)
-        sys.exit("\nLabel labels/pairs_to_label.csv (see labels/LABELLING_GUIDE.md), save it as "
-                 "labels/pairs_labelled.csv and rerun, or pass --threshold for a provisional run.")
+        sys.exit("\nLabel labels/pairs_to_label.csv, save it as labels/pairs_labelled.csv and rerun, "
+                 "or pass --threshold 0.55 as in the report.")
     sh("src/classify.py", "--variant", "raw", *tag, *thr)
     if a.model_tag == "LaBSE":
         used = json.loads(Path("results/raw/stage1.json").read_text())["threshold"]

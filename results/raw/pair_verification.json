@@ -1,0 +1,95 @@
+{
+ "overall": {
+  "n": 51,
+  "translation": 0.314,
+  "partial": 0.294,
+  "different": 0.392
+ },
+ "by_quartile": {
+  "1": {
+   "n": 11,
+   "translation": 0.182,
+   "partial": 0.364,
+   "different": 0.455
+  },
+  "2": {
+   "n": 13,
+   "translation": 0.231,
+   "partial": 0.231,
+   "different": 0.538
+  },
+  "3": {
+   "n": 14,
+   "translation": 0.357,
+   "partial": 0.357,
+   "different": 0.286
+  },
+  "4": {
+   "n": 13,
+   "translation": 0.462,
+   "partial": 0.231,
+   "different": 0.308
+  }
+ },
+ "ai_vs_human": {
+  "ai_rows": 35,
+  "with_human_label": 24,
+  "raw": 0.708,
+  "cohen_kappa": 0.538
+ },
+ "verified (label 2)": {
+  "pairs": 16,
+  "floor": 0.5,
+  "floor_ci": [
+   0.389,
+   0.65
+  ],
+  "gap": 0.286,
+  "gap_ci": [
+   0.142,
+   0.412
+  ]
+ },
+ "label 1 or 2": {
+  "pairs": 31,
+  "floor": 0.532,
+  "floor_ci": [
+   0.423,
+   0.659
+  ],
+  "gap": 0.254,
+  "gap_ci": [
+   0.134,
+   0.363
+  ]
+ },
+ "all sampled": {
+  "pairs": 51,
+  "floor": 0.539,
+  "floor_ci": [
+   0.46,
+   0.623
+  ],
+  "gap": 0.247,
+  "gap_ci": [
+   0.165,
+   0.327
+  ]
+ },
+ "by_protocol": {
+  "ai_assisted_speaker_reviewed": {
+   "n": 27,
+   "translation": 0.407,
+   "partial": 0.333,
+   "different": 0.259,
+   "gap_label_1_or_2": 0.261
+  },
+  "speaker_own": {
+   "n": 24,
+   "translation": 0.208,
+   "partial": 0.25,
+   "different": 0.542,
+   "gap_label_1_or_2": 0.241
+  }
+ }
+}

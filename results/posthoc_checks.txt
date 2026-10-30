@@ -70,3 +70,23 @@ check: all=0.877 floor=0.618 gap=0.258
    1884-89: issues=40 pair chunks= 262 all=0.863 floor=0.630 gap=0.233 [0.176, 0.283]
    1890-94: issues=37 pair chunks= 136 all=0.890 floor=0.596 gap=0.294 [0.220, 0.357]
    change in gap (1890-94 minus 1884-89): +0.061, 95% CI [-0.029, +0.142]
+
+######## raw: checks 5-6
+
+5. floor on embedding-free anchor pairs
+   anchor pairs: chunks=434 floor=0.627 [0.589, 0.664] gap=0.159 [0.128, 0.191]
+   anchor pairs not in embedding pairs: chunks=252 floor=0.670 [0.617, 0.724] gap=0.117 [0.066, 0.169]
+   217 anchor pairs; 182 of their 434 chunks are in embedding pairs
+
+6. page 2 alone
+   chunks=3464 pair chunks=240 all=0.701 floor=0.496 gap=0.205 [0.145, 0.397]
+
+######## raw__multilingual-e5-base: checks 5-6
+
+5. floor on embedding-free anchor pairs
+   anchor pairs: chunks=434 floor=0.636 [0.600, 0.673] gap=0.241 [0.205, 0.276]
+   anchor pairs not in embedding pairs: chunks=270 floor=0.685 [0.632, 0.734] gap=0.192 [0.141, 0.240]
+   217 anchor pairs; 164 of their 434 chunks are in embedding pairs
+
+6. page 2 alone
+   chunks=3464 pair chunks=136 all=0.829 floor=0.739 gap=0.090 [-0.174, 0.357]

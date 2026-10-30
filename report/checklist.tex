@@ -20,7 +20,7 @@
 \item {\bf Limitations}
     \item[] Question: Does the paper discuss the limitations of the work performed by the authors?
     \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: Methods, Results, Discussion: a loose pair threshold (39\% of the 51 hand-checked pairs are not translations), no number of removed directions reaching the 0.55 validation target, only 51 hand-checked pairs (27 of them labelled with AI suggestions and reviewed by the isiXhosa speaker, with the possible lean towards the suggestions reported), no hand-checking of normaliser rewrites, translations as an imperfect control (\emph{isiXhosa asitolikwa}), topic checks with LaBSE only, and that the method measures what was printed but not why.
+    \item[] Justification: Methods, Results, Discussion: a floor that depends on the pairs used, a loose pair threshold (of the 51 hand-checked pairs, 31\% were translations, 29\% partial and 39\% different), a simulation that does not model pairs selected for similarity, no number of removed directions reaching the 0.55 validation target, only 51 hand-checked pairs (27 of them labelled with AI suggestions and reviewed by the isiXhosa speaker, with the possible lean towards the suggestions reported), no hand-checking of normaliser rewrites, translations as an imperfect control (\emph{isiXhosa asitolikwa}), topic checks with LaBSE only, and that the method measures what was printed but not why.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer NA means that the paper has no limitation while the answer No means that the paper has limitations, but those are not discussed in the paper. 
@@ -50,7 +50,7 @@
     \item {\bf Experimental Result Reproducibility}
     \item[] Question: Does the paper fully disclose all the information needed to reproduce the main experimental results of the paper to the extent that it affects the main claims and/or conclusions of the paper (regardless of whether the code and data are provided or not)?
     \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: Methods give the issue filter, chunking, boilerplate rule, issue-level splits, normaliser rules and thresholds, pair selection, the language-removal equation, the hyperparameter grids and selection rules, and the bootstrap; the submitted code implements them with fixed seeds.
+    \item[] Justification: The Introduction and Methods give the chunk size, issue filter, issue-level splits, normaliser rules and thresholds, pair selection, the language-removal equation, the hyperparameter grids and selection rules, and the resampling over test issues. The exact rule for repeated text and the E5 pair threshold are in README.txt, and the submitted code implements everything with fixed seeds.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer NA means that the paper does not include experiments.
@@ -70,7 +70,7 @@
 \item {\bf Open access to data and code}
     \item[] Question: Does the paper provide open access to the data and code, with sufficient instructions to faithfully reproduce the main experimental results, as described in supplemental material?
     \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: Code is submitted with README.txt and requirements.txt listing every command. The newspaper text is openly available from the archive (Schoots et al., 2023); the language-split files we used were provided with the course, and the modern corpora and encoders download automatically.
+    \item[] Justification: Code is submitted with requirements.txt and a README.txt listing every command, and is available at \url{https://github.com/froggomelo/nlp-project-2}. The newspaper text is openly available from the archive (Schoots et al., 2023); the language-split files we used were provided with the course, and the modern corpora and encoders download automatically.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer NA means that paper does not include experiments requiring code.
@@ -87,7 +87,7 @@
 \item {\bf Experimental Setting/Details}
     \item[] Question: Does the paper specify all the training and test details (e.g., data splits, hyperparameters, how they were chosen, type of optimizer, etc.) necessary to understand the results?
     \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: Methods: 357/77/77 train/validation/test issues stratified by year; k, C and the kNN neighbour count chosen on validation; normaliser thresholds fixed in advance to favour precision; the classifier is class-balanced logistic regression (scikit-learn, L-BFGS).
+    \item[] Justification: Methods give the 357/77/77 train/validation/test issues stratified by year, and k and C chosen on validation. The code and README.txt give the rest: the kNN neighbour count chosen on validation, normaliser thresholds fixed in advance to favour precision, the E5 pair threshold of 0.857 (which keeps the same share of candidate pairs as 0.55 for LaBSE), and class-balanced logistic regression (scikit-learn, L-BFGS).
     \item[] Guidelines:
     \begin{itemize}
         \item The answer NA means that the paper does not include experiments.
@@ -98,7 +98,7 @@
 \item {\bf Experiment Statistical Significance}
     \item[] Question: Does the paper report error bars suitably and correctly defined or other appropriate information about the statistical significance of the experiments?
     \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: Test results carry 95\% paired bootstrap confidence intervals over test issues (1,000 resamples); the H2 equivalence test uses 90\% intervals against a $\pm$0.02 margin; synthetic results show the standard deviation over five seeds (Figure 1).
+    \item[] Justification: The main test results carry 95\% bootstrap confidence intervals over test issues (1,000 resamples), and Table S2 marks the rows that have them. The H2 equivalence test uses 90\% intervals against a $\pm$0.02 margin, and synthetic results show the standard deviation over five seeds (Figure 1).
     \item[] Guidelines:
     \begin{itemize}
         \item The answer NA means that the paper does not include experiments.
@@ -115,7 +115,7 @@
 \item {\bf Experiments Compute Resources}
     \item[] Question: For each experiment, does the paper provide sufficient information on the computer resources (type of compute workers, memory, time of execution) needed to reproduce the experiments?
     \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: README.txt: embedding takes about one hour on one free Colab T4 GPU (16 GB); every other stage runs on a CPU, the analysis in about 15 minutes per encoder.
+    \item[] Justification: README.txt: embedding takes about one hour on a free Kaggle notebook with a Tesla T4 GPU (15 GB), and every other stage runs on a CPU, with the analysis taking about 15 minutes per encoder.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer NA means that the paper does not include experiments.
@@ -127,7 +127,7 @@
 \item {\bf Code Of Ethics}
     \item[] Question: Does the research conducted in the paper conform, in every respect, with the NeurIPS Code of Ethics \url{https://neurips.cc/public/EthicsGuidelines}?
     \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: We use public-domain historical newspapers and no human subjects, and we discuss the representational harm of rewriting authors' names and beliefs into modern spelling (Discussion).
+    \item[] Justification: We use public-domain historical newspapers and no human subjects, and the Discussion covers how modernising rewrites the names people used in 1884, including God (Tixo).
     \item[] Guidelines:
     \begin{itemize}
         \item The answer NA means that the authors have not reviewed the NeurIPS Code of Ethics.
@@ -139,7 +139,7 @@
 \item {\bf Broader Impacts}
     \item[] Question: Does the paper discuss both potential positive societal impacts and negative societal impacts of the work performed?
     \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: Discussion: the method lets researchers compare what multilingual sources told different readerships and tests a common preprocessing step for an under-resourced language; the negative side is that normalisation can overwrite how authors wrote names and beliefs, and English-centric tools invite analysing only the English half.
+    \item[] Justification: On the positive side, the paper measures how a bilingual newspaper's sections differ and asks future archive studies to report the floor under both spellings. On the negative side, the Discussion notes that modernising rewrites how people named themselves, and that tools reading English more easily may tempt researchers to study only the English half.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer NA means that there is no societal impact of the work performed.
@@ -153,7 +153,7 @@
 \item {\bf Safeguards}
     \item[] Question: Does the paper describe safeguards that have been put in place for responsible release of data or models that have a high risk for misuse (e.g., pretrained language models, image generators, or scraped datasets)?
     \item[] Answer: \answerNA{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: We release no models or scraped data with a high risk of misuse; outputs are statistics derived from public-domain text.
+    \item[] Justification: We release no models or scraped data with a high risk of misuse; outputs are statistics and excerpts of public-domain text.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer NA means that the paper poses no such risks.
@@ -181,7 +181,7 @@
 \item {\bf New Assets}
     \item[] Question: Are new assets introduced in the paper well documented and is the documentation provided alongside the assets?
     \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: The code, normaliser and labelling guide are documented in README.txt and labels/LABELLING\_GUIDE.md.
+    \item[] Justification: The code and normaliser are documented in README.txt. The labelling sheets are not released, but their scores are in results/raw/pair\_verification.json.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer NA means that the paper does not release new assets.
@@ -193,7 +193,7 @@
 \item {\bf Crowdsourcing and Research with Human Subjects}
     \item[] Question: For crowdsourcing experiments and research with human subjects, does the paper include the full text of instructions given to participants and screenshots, if applicable, as well as details about compensation (if any)? 
     \item[] Answer: \answerNA{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: No crowdsourcing or research with human subjects. A fluent isiXhosa speaker labelled 24 sampled translated pairs herself and reviewed 27 more that a team member had labelled with AI translations and suggested labels (translation, partial or different), following labels/LABELLING\_GUIDE.md; no personal data was collected, and the instructions are released with the labels.
+    \item[] Justification: No crowdsourcing or research with human subjects. A fluent isiXhosa speaker labelled 24 sampled translated pairs herself and reviewed 27 more that a team member had labelled with AI translations and suggested labels (translation, partial or different), following a written labelling guide. No personal data was collected.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer NA means that the paper does not involve crowdsourcing nor research with human subjects.
