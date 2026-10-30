@@ -51,15 +51,17 @@ def synthetic(ax):
         g.index = g.index + dodge[method]
         ax.fill_between(g.index, g["mean"] - g["std"], g["mean"] + g["std"], color=colour, alpha=0.12, lw=0)
         ax.plot(g.index, g["mean"], color=colour, ls=ls, lw=1.3, marker="o", ms=3.2, mec="white", mew=0.5, label=label)
-        if method == "pairs":  # label the method's own end point
-            ax.text(g.index[-1] + 0.012, g["mean"].iloc[-1], f"{g['mean'].iloc[-1]:.3f}".lstrip("0"), va="center", color=INK)
+        spot = {("oracle", 0.0): 0.122, ("pairs", 0.0): 0.092, ("oracle", 0.4): 0.062, ("pairs", 0.4): 0.032}[(method, ff)]
+        end = g["mean"].iloc[-1]  # values spaced evenly, each joined to its line by a thin leader in its colour
+        ax.annotate(f"{end:.3f}".lstrip("0"), xy=(g.index[-1], end), xytext=(0.44, spot), va="center", color=INK,
+                    arrowprops=dict(arrowstyle="-", color=colour, lw=0.6, shrinkA=1, shrinkB=2))
     g = syn[syn.false_frac == 0.0].groupby("delta")["mean-centre_gap"].mean()
     ax.plot(g.index, g.values, color=GREEN, ls=":", marker="s", ms=3, mec="white", mew=0.5, lw=1.3, label="Mean-centring")
     ax.legend(loc="upper left", ncol=2, labelspacing=0.2, handlelength=2.0, columnspacing=1.2, borderaxespad=0.1)
     ax.set_xlabel(r"Planted difference $\delta$")
     ax.set_ylabel(r"$\Delta$ on test chunks")
     ax.set_xticks([0, 0.1, 0.2, 0.4])
-    ax.set_xlim(-0.02, 0.46)
+    ax.set_xlim(-0.02, 0.485)
     ax.set_ylim(-0.012, 0.175)
     ax.set_yticks([0, 0.05, 0.10, 0.15])
     ax.yaxis.set_major_formatter(lambda v, _: f"{v:.2f}")
@@ -108,7 +110,7 @@ def floor_dumbbells(ax):
 
 
 def main_figure():
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 1.45), gridspec_kw=dict(width_ratios=[1.0, 1.1]))
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 1.6), gridspec_kw=dict(width_ratios=[1.0, 1.1]))
     synthetic(axes[0])
     floor_dumbbells(axes[1])
     fig.tight_layout(w_pad=2.5)

@@ -73,6 +73,23 @@ Do the same for `modern_asp` and `modern_prefix`. For the second encoder, add `-
 
 The pipeline also writes extra plots and large intermediate files, which are not stored here.
 
+## Reproducing the numbers
+
+The reported numbers come from the run saved in `colab/embed_on_kaggle.ipynb`, with the package versions in `results/environment_analyse.json` (scikit-learn 1.6.1, numpy 2.1.3).
+
+A rerun on a laptop with newer versions (scikit-learn 1.9.1, numpy 2.2.6) reproduced the main result exactly (BA 0.786, floor 0.590, Δ 0.196), as well as `k`, the simulation, the tool metrics and the stricter-pair floors. Other results can shift slightly, most likely because close validation scores can select a different `C` and the clustering can settle differently:
+
+| Result | Reported | Rerun |
+|---|---|---|
+| Change in Δ with modern spelling | +0.018 | +0.006 |
+| Floor with modern spelling | 0.571 | 0.584 |
+| Floor with language removed using pairs of similarity ≥0.65 | 0.725 | 0.680 |
+| E5 Δ | 0.258 | 0.260 |
+| Topic-only Δ | 0.138 | 0.146 |
+| Number of topic clusters | 32 | 24 |
+
+The conclusions held in both runs: Δ stays positive, H2 stays inconclusive, stricter pairs for removal raise the floor, and topic accounts for most of Δ. To compare with the reported numbers exactly, use the package versions above.
+
 ## Hand labels
 
 Of 100 sampled test pairs, a fluent isiXhosa speaker labelled 24 herself. She also checked all 27 that a team member had labelled with AI translations and suggested labels, changing the ones she disagreed with. Labels were 2 (translation), 1 (partial) and 0 (different). `data/pair_labels.csv` holds one row per sampled pair, with the final label, how it was labelled, and the AI suggestion, which is only compared with the final labels and never used as one. For the 27, `speaker_mark` holds her mark. She left a row blank when she kept its label, so `speaker_mark_source` is `written` for the 14 she marked and `kept` for the 13 she left unchanged. `src/posthoc/verify_pairs.py` scores it and writes `results/raw/pair_verification.json`. The rest of the pipeline needs no labels.

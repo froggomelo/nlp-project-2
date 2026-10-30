@@ -126,7 +126,7 @@ the newspaper's own translations are the control.
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{figures/fig_results.pdf}
-  \caption{\looseness=-1 (a) Simulation, showing $\Delta$ is found as the planted difference $\delta$ grows (over 5 seeds with $\pm$std). Dashed lines have 40\% false pairs. Mean-centring subtracts each language's mean. (b) Test issues with LaBSE. Each line runs from the floor (open) to BA on all test chunks (filled), and its length, printed beside it, is $\Delta$.}
+  \caption{\looseness=-1 (a) Simulation: $\Delta$ found as the planted difference $\delta$ grows (5 seeds, $\pm$std). Dashed lines have 40\% false pairs. (b) Test issues: each line runs from the floor to BA on all test chunks, and its length is $\Delta$.}
   \label{fig:res}
 \end{figure*}
 
@@ -186,7 +186,7 @@ behave differently, as they are paired for looking similar.
 \textbf{Topic accounts for much of $\Delta$.} A topic-only rule reaches 0.661 on test chunks, but only 0.523 on
 translated pairs, whose halves should share a topic. Topic accounts for about 70\% of $\Delta$ (0.138 of 0.196; Table~S2).
 Chunks on topics the other section usually covers are correctly predicted 59\% of the time, against 88\% for
-chunks on their own section's usual topics. Topic is not everything, though, as within one topic the classifier still reaches 0.73.
+chunks on their own section's usual topics. Topic is not everything, though, as within a topic the classifier still averages 0.73 (over 24 topics).
 
 \textbf{Spelling's effect on $\Delta$ is unresolved (H2).} Aspiration cuts words
 missing from modern text from 31.5\% to 24.5\%, and modernising moves translated pairs closer (similarity $+$0.005). Yet its effect on $\Delta$ cannot be told apart from zero ($+$0.018, 90\% CI $-$0.003 to
