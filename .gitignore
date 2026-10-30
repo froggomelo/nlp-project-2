@@ -13,3 +13,6 @@ report/*.log
 report/*.out
 embeddings_all.zip
 results_all.zip
+labels/
+pair_rescore_bundle*
+results/*.err
