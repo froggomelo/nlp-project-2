@@ -6,7 +6,6 @@ data/processed/*.parquet
 colab/*.zip
 logs/
 __pycache__/
-results/*__FAKE/
 results/**/*.parquet
 report/*.aux
 report/*.log

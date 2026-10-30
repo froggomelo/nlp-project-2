@@ -25,17 +25,6 @@ data/raw/TxtLangFiles1870-1894_TB/EnTxt
 
 The modern isiXhosa corpora (Vukuzenzele, isiXhosa Wikipedia and OPUS-100 en-xh) and the encoders download automatically from Hugging Face.
 
-## Quick test
-
-After stage 1 below, this checks that every stage runs, without a GPU:
-
-```bash
-python src/smoke_test.py
-python src/smoke_test.py --clean
-```
-
-It uses stand-in embeddings, so its numbers mean nothing. The second command removes its outputs.
-
 ## Running the experiments
 
 | Stage | Command | What it gives | Time |
