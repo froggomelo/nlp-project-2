@@ -5,7 +5,7 @@ predictions, so the classifier and language removal (from the 0.55 training pair
 Exploratory: chosen after seeing test results, so no threshold is selected from them.
 
 Usage:
-    python src/floor_checks.py > results/floor_checks.txt
+    python -m src.posthoc.floor_checks > results/floor_checks.txt
 """
 import numpy as np
 import pandas as pd

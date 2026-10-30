@@ -27,7 +27,7 @@ bootstrap CI of the gap change must lie inside +/- margin:
   inconclusive    neither (more test issues would be needed to decide)
 
 Usage:
-    python src/compare.py --variants raw modern modern_asp modern_prefix modern_keepnames [--margin 0.02]
+    python -m src.analysis.compare --variants raw modern modern_asp modern_prefix modern_keepnames [--margin 0.02]
 """
 import argparse
 import json
@@ -37,7 +37,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import balanced_accuracy_score
 
-from common import load_embeddings, load_usable, run_dir
+from src.common import load_embeddings, load_usable, run_dir
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402

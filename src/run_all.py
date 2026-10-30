@@ -1,9 +1,9 @@
 """Run the pipeline stages in order. Embedding (GPU-heavy) is a separate step; see README.txt.
 
 Usage:
-    python src/run_all.py prepare        # Stage 0 + Stage 2 text side: data, word list, normaliser variants
-    python src/run_all.py analyse        # after embeddings exist: pairs, classifier, comparison, analyses
-    python src/run_all.py analyse --model-tag multilingual-e5-base     # second encoder
+    python -m src.run_all prepare        # Stage 0 + Stage 2 text side: data, word list, normaliser variants
+    python -m src.run_all analyse        # after embeddings exist: pairs, classifier, comparison, analyses
+    python -m src.run_all analyse --model-tag multilingual-e5-base     # second encoder
 Options:
     --threshold X   provisional LaBSE pair-similarity threshold if labels/pairs_labelled.csv is not
                     ready yet; other encoders get the threshold that keeps the same share of their
@@ -26,8 +26,8 @@ PACKAGES = ["pandas", "pyarrow", "numpy", "scipy", "scikit-learn", "torch", "tra
 
 
 def sh(*args):
-    print("\n$ python", " ".join(args), flush=True)
-    subprocess.run([sys.executable, *args], check=True)
+    print("\n$ python -m", " ".join(args), flush=True)
+    subprocess.run([sys.executable, "-m", *args], check=True)
 
 
 def record_environment(phase):
@@ -52,15 +52,15 @@ def main():
     record_environment(a.phase)
 
     if a.phase == "prepare":
-        sh("src/prepare_data.py")
-        sh("src/build_lexicon.py")
-        sh("src/normalise.py", "candidates")
+        sh("src.prepare.prepare_data")
+        sh("src.prepare.build_lexicon")
+        sh("src.prepare.normalise", "candidates")
         if Path("labels/normaliser_labelled.csv").exists():
-            sh("src/normalise.py", "tune")
+            sh("src.prepare.normalise", "tune")
         for rules in ["all", "asp", "prefix", "keepnames"]:
-            sh("src/normalise.py", "apply", "--rules", rules)
-        sh("src/tool_metrics.py")
-        sh("src/synthetic_check.py")
+            sh("src.prepare.normalise", "apply", "--rules", rules)
+        sh("src.prepare.tool_metrics")
+        sh("src.prepare.synthetic_check")
         return
 
     # only the variants embedded with this encoder (the Colab notebook embeds raw + modern for E5)
@@ -71,9 +71,9 @@ def main():
     if skipped:
         print(f"\n{a.model_tag}: no embeddings for {skipped}; analysing {variants}")
     for v in variants:
-        sh("src/pairs.py", "candidates", "--variant", v, *tag)
+        sh("src.analysis.pairs", "candidates", "--variant", v, *tag)
     if Path("labels/pairs_labelled.csv").exists():
-        sh("src/pairs.py", "tune", *tag)
+        sh("src.analysis.pairs", "tune", *tag)
         thr = []
     elif a.threshold is not None and a.model_tag == "LaBSE":
         thr = ["--threshold", str(a.threshold)]
@@ -81,27 +81,27 @@ def main():
     elif a.threshold is not None:
         if not Path("results/raw/pair_candidates.parquet").exists():
             sys.exit("\nRun the LaBSE analysis first: this encoder's provisional threshold is matched to LaBSE's.")
-        sh("src/pairs.py", "match", *tag, "--ref-threshold", str(a.threshold))
+        sh("src.analysis.pairs", "match", *tag, "--ref-threshold", str(a.threshold))
         thr = []  # classify.py reads the matched threshold from pair_threshold.json
         print(f"\nNo labelled pairs yet: {a.model_tag} threshold matched to LaBSE at {a.threshold}")
     else:
-        sh("src/pairs.py", "sheet", *tag)
+        sh("src.analysis.pairs", "sheet", *tag)
         sys.exit("\nLabel labels/pairs_to_label.csv, save it as labels/pairs_labelled.csv and rerun, "
                  "or pass --threshold 0.55 as in the report.")
-    sh("src/classify.py", "--variant", "raw", *tag, *thr)
+    sh("src.analysis.classify", "--variant", "raw", *tag, *thr)
     if a.model_tag == "LaBSE":
         used = json.loads(Path("results/raw/stage1.json").read_text())["threshold"]
         if a.robust_threshold > used:
             try:  # a robustness check must not stop the main analysis
-                sh("src/classify.py", "--variant", "raw", *tag, "--threshold", str(a.robust_threshold),
+                sh("src.analysis.classify", "--variant", "raw", *tag, "--threshold", str(a.robust_threshold),
                    "--run-name", f"raw_thr{a.robust_threshold}")
             except subprocess.CalledProcessError:
                 print(f"\nWARNING: robustness run at threshold {a.robust_threshold} failed; continuing")
     for v in variants[1:]:
-        sh("src/classify.py", "--variant", v, "--pairs-from", "raw", "--k-from", "raw", *tag, *thr)
+        sh("src.analysis.classify", "--variant", v, "--pairs-from", "raw", "--k-from", "raw", *tag, *thr)
     if len(variants) > 1:
-        sh("src/compare.py", "--variants", *variants, *tag)
-    sh("src/qualitative.py", *tag)
+        sh("src.analysis.compare", "--variants", *variants, *tag)
+    sh("src.analysis.qualitative", *tag)
 
 
 if __name__ == "__main__":

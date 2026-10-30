@@ -9,7 +9,7 @@ cluster's isiXhosa lean is its share of isiXhosa-section chunks among TRAIN chun
   4. per-topic table: accuracy on each section's chunks
 
 Usage:
-    python src/topic_errors.py > results/topic_errors.txt
+    python -m src.posthoc.topic_errors > results/topic_errors.txt
 """
 import json
 
@@ -18,10 +18,10 @@ import pandas as pd
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.metrics import balanced_accuracy_score as bas
 
-from classify import project_out
-from common import load_embeddings, load_usable
-from qualitative import distinctive_words
-from report_figures import TOPIC_LABELS
+from src.analysis.classify import project_out
+from src.common import load_embeddings, load_usable
+from src.analysis.qualitative import distinctive_words
+from src.figures.report_figures import TOPIC_LABELS
 
 B, rng = 1000, np.random.default_rng(13)
 q = json.load(open("results/raw/qualitative.json"))

@@ -10,7 +10,7 @@ Uses the saved embeddings and language basis only to measure how much of each ch
 removed directions.
 
 Usage:
-    python src/pair_cases.py . > results/pair_cases.md
+    python -m src.posthoc.pair_cases . > results/pair_cases.md
 """
 import re
 import sys

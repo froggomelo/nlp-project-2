@@ -8,9 +8,9 @@ With --reuse raw, only chunks whose text differs from the raw run are embedded; 
 embeddings. This keeps the comparison exact for unchanged text and cuts GPU time.
 
 Usage:
-    python src/embed.py --variant raw
-    python src/embed.py --variant modern --chunks data/processed/chunks_modern.parquet --reuse raw
-    python src/embed.py --variant raw --model intfloat/multilingual-e5-base --prefix "query: "   (second encoder)
+    python -m src.embedding.embed --variant raw
+    python -m src.embedding.embed --variant modern --chunks data/processed/chunks_modern.parquet --reuse raw
+    python -m src.embedding.embed --variant raw --model intfloat/multilingual-e5-base --prefix "query: "   (second encoder)
 """
 import argparse
 import os
@@ -21,7 +21,7 @@ import numpy as np
 import torch
 from sentence_transformers import SentenceTransformer
 
-from common import load_usable
+from src.common import load_usable
 
 
 def main():

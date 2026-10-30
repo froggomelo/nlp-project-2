@@ -6,16 +6,16 @@ cosine similarity and a model-free signal (shared capitalised names and numbers)
 human labellers and lets us check the encoder independently.
 
 Modes:
-    python src/pairs.py candidates            # all mutual-NN candidates -> results/<variant>/pair_candidates.parquet
-    python src/pairs.py sheet --n 300         # labelling sheet from val/test issues -> labels/pairs_to_label.csv
+    python -m src.analysis.pairs candidates            # all mutual-NN candidates -> results/<variant>/pair_candidates.parquet
+    python -m src.analysis.pairs sheet --n 300         # labelling sheet from val/test issues -> labels/pairs_to_label.csv
 
 The labelling sheet mixes two sources so the labels can serve two purposes:
   raw     mutual-NN candidates stratified by similarity -> tunes the similarity threshold
   anchor  pairs found WITHOUT embeddings (mutual best overlap of names/numbers within an issue)
           -> an encoder-independent set of true pairs, so alignment can be compared across spelling
              variants without favouring the variant the candidates were selected in
-    python src/pairs.py tune                  # pick threshold from labelled val pairs, report test P/R
-    python src/pairs.py match --model-tag multilingual-e5-base --ref-threshold 0.55
+    python -m src.analysis.pairs tune                  # pick threshold from labelled val pairs, report test P/R
+    python -m src.analysis.pairs match --model-tag multilingual-e5-base --ref-threshold 0.55
         # provisional threshold for another encoder before labels exist: keep the same share of its
         # candidates as LaBSE keeps at --ref-threshold. Similarity scales differ between encoders
         # (E5 cosine similarities sit in a narrow band near 0.85), so one number cannot serve both.
@@ -28,7 +28,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from common import load_embeddings, load_usable, run_dir
+from src.common import load_embeddings, load_usable, run_dir
 
 NAME_RE = re.compile(r"\b(?:[A-Z][a-zA-Z]{3,}|\d{2,})")
 

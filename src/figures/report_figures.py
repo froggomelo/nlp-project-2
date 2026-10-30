@@ -8,7 +8,7 @@ Reads results/synthetic/synthetic.json, results/compare/compare.json,
 results/raw/stage1_test_predictions.parquet and results/raw/qualitative.json.
 
 Usage:
-    python src/report_figures.py
+    python -m src.figures.report_figures
 """
 import json
 from pathlib import Path

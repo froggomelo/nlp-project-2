@@ -22,9 +22,9 @@ class-balanced sample of train chunks, number of neighbours tuned on validation)
 mean-centring and the chosen k.
 
 Usage:
-    python src/classify.py --variant raw [--threshold 0.55]
-    python src/classify.py --variant modern --pairs-from raw --k-from raw
-    python src/classify.py --variant raw --threshold 0.65 --run-name raw_thr0.65   # robustness run
+    python -m src.analysis.classify --variant raw [--threshold 0.55]
+    python -m src.analysis.classify --variant modern --pairs-from raw --k-from raw
+    python -m src.analysis.classify --variant raw --threshold 0.65 --run-name raw_thr0.65   # robustness run
 """
 import argparse
 import gc
@@ -38,7 +38,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import balanced_accuracy_score
 from sklearn.neighbors import NearestNeighbors
 
-from common import load_embeddings, load_usable, run_dir
+from src.common import load_embeddings, load_usable, run_dir
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
@@ -149,7 +149,7 @@ def main():
     chunks = "data/processed/chunks.parquet" if args.variant == "raw" else         f"data/processed/chunks_{args.variant}.parquet"
     df, emb = load_embeddings(load_usable(chunks), args.variant, args.model_tag)
     if set(df["split"]) != {"train", "val", "test"}:
-        raise SystemExit("embeddings incomplete: wait for src/embed.py to finish")
+        raise SystemExit("embeddings incomplete: wait for src/embedding/embed.py to finish")
 
     thr_file = pairs_dir / "pair_threshold.json"
     if args.threshold is not None:

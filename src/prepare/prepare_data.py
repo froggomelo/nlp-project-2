@@ -11,7 +11,7 @@ Outputs (in --out):
     data_card.md     corpus statistics per year and language
 
 Usage:
-    python src/prepare_data.py --raw data/raw/TxtLangFiles1870-1894_TB --out data/processed
+    python -m src.prepare.prepare_data --raw data/raw/TxtLangFiles1870-1894_TB --out data/processed
 """
 import argparse
 import json

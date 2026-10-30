@@ -11,7 +11,7 @@ isiXhosa from Vukuzenzele) this reports:
 Broken down per year for raw and modern.
 
 Usage:
-    python src/tool_metrics.py --variants raw modern modern_asp modern_prefix modern_keepnames
+    python -m src.prepare.tool_metrics --variants raw modern modern_asp modern_prefix modern_keepnames
 """
 import argparse
 import json
@@ -21,7 +21,7 @@ from pathlib import Path
 import pandas as pd
 from transformers import AutoTokenizer
 
-from common import load_usable
+from src.common import load_usable
 
 TOKENISERS = {"LaBSE": "sentence-transformers/LaBSE", "XLM-R": "xlm-roberta-base"}
 WORD_RE = re.compile(r"[A-Za-z]+")

@@ -11,7 +11,7 @@
 5. Genre check for the translated pairs: which pages and clusters they come from.
 
 Usage:
-    python src/qualitative.py --variant raw
+    python -m src.analysis.qualitative --variant raw
 """
 import argparse
 import json
@@ -25,8 +25,8 @@ from scipy.spatial.distance import jensenshannon
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.metrics import silhouette_score
 
-from classify import project_out
-from common import load_embeddings, load_usable, run_dir
+from src.analysis.classify import project_out
+from src.common import load_embeddings, load_usable, run_dir
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402

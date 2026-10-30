@@ -16,7 +16,7 @@ For each delta we compare the gap (all-chunk accuracy minus translated-pair floo
 against the oracle gap from a classifier that sees the content vectors only.
 
 Usage:
-    python src/synthetic_check.py
+    python -m src.prepare.synthetic_check
 Outputs: results/synthetic/fig_synthetic.png (clean pairs), fig_synthetic_noisy.png (40% false pairs),
 synthetic.json and synthetic_summary.csv (both conditions).
 """
@@ -27,7 +27,7 @@ import matplotlib
 import numpy as np
 from sklearn.metrics import balanced_accuracy_score
 
-from classify import fit_best_c, language_basis, project_out
+from src.analysis.classify import fit_best_c, language_basis, project_out
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402

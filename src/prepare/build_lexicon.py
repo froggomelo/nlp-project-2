@@ -12,7 +12,7 @@ The datasets are not pinned to a revision, so results/lexicon/lexicon_sources.js
 Hugging Face commit of each dataset at build time, with its token and type counts.
 
 Usage:
-    python src/build_lexicon.py
+    python -m src.prepare.build_lexicon
 """
 import json
 import re

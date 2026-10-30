@@ -4,7 +4,7 @@
 4. gap per period (1884-89, 1890-94), each against its own floor: yearly floors rest on too few pairs
 
 Usage:
-    python src/posthoc_checks.py . > results/posthoc_checks.txt
+    python -m src.posthoc.posthoc_checks . > results/posthoc_checks.txt
 """
 import re
 import sys
@@ -117,7 +117,7 @@ for run, thr in [("raw", 0.55), ("raw__multilingual-e5-base", 0.8571373618568346
 
 
 # 5-6 run after checks 1-4 so the earlier numbers keep their random draws
-from pairs import anchor_pairs  # noqa: E402
+from src.analysis.pairs import anchor_pairs  # noqa: E402
 
 chunks = pd.read_parquet(f"{root}/data/processed/chunks.parquet")
 test_chunks = chunks[chunks.usable & (chunks.split == "test")].reset_index(drop=True)

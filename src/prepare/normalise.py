@@ -15,13 +15,13 @@ on hand-checked validation words, favouring precision (F0.5) because over-correc
 own spelling is the costly error. All three rule families appear on the hand-checking sheet.
 
 Modes:
-    python src/normalise.py candidates              # per-word-type rewrite candidates
-    python src/normalise.py sheet --n 240           # labels/normaliser_to_label.csv for hand-checking
-    python src/normalise.py tune                    # thresholds from labels/normaliser_labelled.csv
-    python src/normalise.py apply --rules all       # data/processed/chunks_modern.parquet
-    python src/normalise.py apply --rules asp       # ablation: data/processed/chunks_modern_asp.parquet
-    python src/normalise.py apply --rules prefix    # ablation: data/processed/chunks_modern_prefix.parquet
-    python src/normalise.py apply --rules keepnames # both rules, but likely proper names keep their
+    python -m src.prepare.normalise candidates              # per-word-type rewrite candidates
+    python -m src.prepare.normalise sheet --n 240           # labels/normaliser_to_label.csv for hand-checking
+    python -m src.prepare.normalise tune                    # thresholds from labels/normaliser_labelled.csv
+    python -m src.prepare.normalise apply --rules all       # data/processed/chunks_modern.parquet
+    python -m src.prepare.normalise apply --rules asp       # ablation: data/processed/chunks_modern_asp.parquet
+    python -m src.prepare.normalise apply --rules prefix    # ablation: data/processed/chunks_modern_prefix.parquet
+    python -m src.prepare.normalise apply --rules keepnames # both rules, but likely proper names keep their
                                                     # 1880s spelling: data/processed/chunks_modern_keepnames.parquet
 """
 import argparse
