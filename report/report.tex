@@ -72,14 +72,13 @@
 {
 \bf
 \looseness=-1
-In its 1884--1894 issues, \emph{Imvo Zabantsundu} published a large section in isiXhosa and a smaller one
-in English. This study asks whether the two differ in content once the language signal is removed from a
-multilingual encoder's (LaBSE) embeddings, and whether modernising isiXhosa spelling meaningfully changes the
-answer. The newspaper's translations convey the same content in both languages, so a classifier's accuracy on
-them, the floor, estimates how well it tells the two sections apart without much difference in content.
-Performance above this floor suggests that the sections differ in content, mainly in subject matter.
-Modernising the spelling brings translations slightly closer, but its effect on the content difference
-is inconclusive. No change was detected, yet the estimate is too uncertain to demonstrate that the spellings agree.
+In its 1884--1894 issues, \emph{Imvo Zabantsundu} published an isiXhosa section and a smaller English one.
+This study asks whether they differ in content once the language signal is removed from LaBSE embeddings,
+and whether modernising isiXhosa spelling meaningfully changes the answer. A classifier's accuracy on the
+newspaper's translations, the floor, estimates how well it tells the sections apart without much difference
+in content. Performance above this floor suggests that the sections differ in content, mainly in subject
+matter. Modernising the spelling brings translations slightly closer, but its effect on the content
+difference is inconclusive.
 }
 \begin{quote}
 \small
@@ -117,8 +116,7 @@ native isiXhosa speakers and deliberately not spell-checked, as 1880s spelling d
 learners rather than speakers \citep{maseko}, and low-resourcedness is also a question of who builds tools
 and for whom \citep{nekoto}.
 
-\textbf{Removing language.} LaBSE \citep{labse} was trained to match translations in 109
-languages, isiXhosa among them, but its embeddings still identify the language. This signal can be removed
+\textbf{Removing language.} LaBSE \citep{labse} was trained on translations in 109 languages, including isiXhosa, but its embeddings still identify the language. This signal can be removed
 by subtracting each language's average embedding (mean-centring; \citealp{libovicky}), which also removes average content differences, or by projecting out a few directions \citep{lir,inlp}. As with control tasks \citep{hewitt},
 the newspaper's own translations are the control.
 
@@ -183,7 +181,7 @@ while a share $\delta$ of isiXhosa chunks use only a quarter of topics. Simulate
 pairs (unrelated chunks recorded as translations), it shrinks (0.045 vs a true 0.059). But real false pairs may
 behave differently, as they are paired for looking similar.
 
-\textbf{The classifier is above the floor (H1).} On Imvo, the classifier reaches 0.786 on all test chunks but only 0.590 on translated pairs, so $\Delta$ is 0.196 (0.167--0.224), supporting H1. Of 311 test pairs, it gives both halves one label for 201 pairs (it cannot tell which is the translation), correctly tells them apart for 83 and labels both the wrong way round for 27. $\Delta$ is positive in every Table~S2 setting (smallest 0.046) and both time periods (Figure~\ref{fig:res}b), but its size depends on the pairs used (0.117 to 0.286 across the pair sets in Table~S2).
+\textbf{The classifier is above the floor (H1).} On Imvo, the classifier reaches 0.786 on all test chunks but only 0.590 on translated pairs, so $\Delta$ is 0.196 (0.167--0.224), supporting H1. Of 311 test pairs, it gives both halves one label for 201 pairs (it cannot tell which is the translation), correctly tells them apart for 83 and labels both the wrong way round for 27. $\Delta$ is positive in every Table~S2 setting (smallest 0.046) and both time periods (Figure~\ref{fig:res}b), but its size depends on the pairs used (0.117 to 0.286 across the pair sets in Table~S2). No $k$ reached the 0.55 target. Removing one direction lowered the test floor from 0.977 to 0.593, and removing more barely changed it. Removing language with only pairs of similarity $\geq$0.65 raised the floor to 0.725, as only 362 training pairs remain.
 
 \textbf{Topic accounts for much of $\Delta$.} A topic-only rule reaches 0.661 on test chunks, but only 0.523 on
 translated pairs, whose halves should share a topic. Topic accounts for about 70\% of $\Delta$ (0.138 of 0.196; Table~S2).

@@ -62,6 +62,7 @@ Do the same for `modern_asp` and `modern_prefix`. For the second encoder, add `-
 | Pair outcomes (201, 83, 27) | `results/pair_cases.md` |
 | Hand-checked pairs | `data/pair_labels.csv`, scored in `results/raw/pair_verification.json` |
 | Stricter pairs | `results/floor_checks.txt` |
+| Language removal learned from stricter pairs (0.725) | `results/raw_thr0.65/stage1.json` |
 | Pairs matched on names and numbers | `results/posthoc_checks.txt`, check 5 |
 | E5 encoder and kNN | `results/raw__multilingual-e5-base/stage1.json` |
 | Topic-only rule, 59%, 88%, 0.73 | `results/topic_errors.txt` |
