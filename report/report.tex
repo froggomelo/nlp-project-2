@@ -48,6 +48,20 @@
 \usepackage[labelfont=bf, margin=0.8cm, font=sf]{caption}
 % \usepackage[margin=0.5in]{geometry}
 
+% In-text citations name only the first author for three or more authors (Schoots et al., 2023),
+% whatever short label the compiler's BibTeX writes: the short form is rebuilt from apacite's full
+% author list, in which only three or more authors are separated by commas
+\makeatletter
+\def\APA@firstauthor#1,#2\@nil{\ifx\relax#2\relax#1\else#1\ \protect\BOthers{.}\fi}
+\def\citeauthoryear#1#2#3(@)(@)\@nil#4{%
+  \if\relax#3\relax
+    \NAT@wrout{\the\c@NAT@ctr}{#2}{#1}{}{#4}%
+  \else
+    \NAT@wrout{\the\c@NAT@ctr}{#3}{\APA@firstauthor#1,\@nil}{#1}{#4}%
+  \fi
+}
+\makeatother
+
 \newcommand{\TBD}[1]{\textcolor{red}{\textbf{[#1]}}}
 \newcommand{\BA}{\mathrm{BA}}
 % answer macros of the NeurIPS 2024 checklist (from neurips_2024.sty)
@@ -68,6 +82,9 @@
 \newpage
 \phantom{.}
 \newpage
+% Every paragraph in the body opens with a bold lead-in, so none is indented: by default only
+% the first paragraph after a heading starts flush, which made the lead-ins look uneven
+\setlength{\parindent}{0pt}
 \section{Abstract}
 {
 \bf
@@ -160,7 +177,9 @@ where $V_k$ holds the top-$k$ right singular vectors of $D$. A logistic regressi
 sections count equally, is trained on training issues to predict each chunk's section. Two settings are chosen on validation
 issues: the number of directions removed, named $k$, is the smallest value in $\{0,1,2,4,\dots,64\}$ that brings
 the floor to 0.55 or below (64 if none does, as here), and the regularisation strength $C\in\{10^{-2},\dots,10^{3}\}$
-is chosen for the highest BA. \textbf{Spelling effects.} For H2, each spelling variant keeps the pairs and $k$ chosen from the original
+is chosen for the highest BA.
+
+\textbf{Spelling effects.} For H2, each spelling variant keeps the pairs and $k$ chosen from the original
 text, so only spelling is changed. The variant is equivalent to raw if the 90\% CI of its change in $\Delta$ lies within $\pm$0.02.
 
 \textbf{Topic clustering.} Topics are $k$-means clusters of the language-removed embeddings, fitted without section labels. To
@@ -210,7 +229,9 @@ may control content only roughly.
 
 \textbf{Modernisation and the historical record.} Modernisation rules rewrite how people named themselves in 1884:
 a people (\emph{Xosa}), a community (\emph{Tembu}), a town (\emph{Mtata}) and God (\emph{Tixo}). The tools
-also read English more easily (2.11 vs 1.26 LaBSE tokens per word), which may tempt researchers to study only the English half \citep{nekoto}. \textbf{Limitations.} Only 51 pairs were hand-checked and no one checked the rewrites. Topic checks use
+also read English more easily (2.11 vs 1.26 LaBSE tokens per word), which may tempt researchers to study only the English half \citep{nekoto}.
+
+\textbf{Limitations.} Only 51 pairs were hand-checked and no one checked the rewrites. Topic checks use
 LaBSE only, and the method measures what was printed but cannot say why. Future archive studies should
 report the floor under both spellings.
 
@@ -228,10 +249,9 @@ We, Gopolang Mohlakola, Tawananyasha Kadango and Lily de Melo, worked together f
 
 \bibliography{references}
 
+\setlength{\parindent}{10pt} % the template default (ccn.sty) again for the checklist
 \onecolumn
 \input{checklist}
-
-\includepdf[pages=1]{figures/wits_ai_declaration.pdf}
 
 \clearpage
 \raggedbottom
@@ -290,5 +310,6 @@ kNN classifier, E5 encoder & .599 & .553 & .046\\
   \caption{What each section usually wrote about. Each bar is one of 30 topics, with its chunk count, and shows the share of its chunks that are isiXhosa. Blue topics are above the overall share (0.66) and orange ones are below it. Topics are $k$-means clusters of the language-removed embeddings, named by the authors from their most distinctive words. Clusters labelled \emph{names} hold mostly personal and place names, and numbered ones have no clear subject. The topics overlap (silhouette score 0.008, where 0 means fully overlapping), so they describe content rather than measure it.}
 \end{figure}
 
+\includepdf[pages=1]{figures/wits_ai_declaration.pdf}
 
 \end{document}
