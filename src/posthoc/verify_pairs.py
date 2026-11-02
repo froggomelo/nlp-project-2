@@ -1,12 +1,14 @@
 """Hand check of the kept test pairs that the floor is computed on (no retraining, CPU, seconds).
 
 100 kept test pairs were sampled, 25 per similarity quartile, with the similarity hidden from labellers.
-51 were labelled. A fluent isiXhosa speaker labelled 24 herself. She also checked all 27 that a team
+67 were labelled. A fluent isiXhosa speaker labelled 24 herself. She also checked all 27 that a team
 member had labelled with AI translations and suggested labels, changing the ones she disagreed with.
+A second isiXhosa speaker labelled 16 more herself (data/hand_checks/ has both speakers' workbooks).
 
 data/pair_labels.csv holds one row per sampled pair:
     label     2 = translation, 1 = partial, 0 = different, blank = not labelled
-    protocol  speaker_own, or ai_assisted_speaker_reviewed for the 27
+    labeller  who gave the final label
+    protocol  speaker_own, ai_assisted_speaker_reviewed for the 27, or second_speaker_own for the 16
     ai_label  the AI's suggestion, only compared with the final labels and never used as a label
     speaker_mark, speaker_mark_source  for the 27, her mark: written by her, or kept when she left the row blank
 
@@ -86,7 +88,9 @@ def main():
         keep = g[g.label >= 1]
         ids = set(keep.xh_id) | set(keep.en_id)
         out["by_protocol"][protocol] = dict(shares(g), gap_label_1_or_2=round(float(ba(pred) - ba(pred[pred.chunk_id.isin(ids)])), 3))
-    print("by protocol:", out["by_protocol"])
+    own = done[done.protocol.isin(["speaker_own", "second_speaker_own"])]
+    out["both_speakers_own"] = shares(own)
+    print("by protocol:", out["by_protocol"], "\nboth speakers' own labels:", out["both_speakers_own"])
 
     OUT.write_text(json.dumps(out, indent=1))
     print(f"-> {OUT}")

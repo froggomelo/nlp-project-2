@@ -162,10 +162,7 @@ likely names (capitalised in $\geq$90\% of uses). \emph{Modern} spelling applies
 \textbf{Embeddings and translated pairs.} Each chunk is embedded with LaBSE and, for comparison,
 multilingual-E5 \citep{e5}. Within each issue, an isiXhosa and an English chunk that are each other's
 closest match by cosine similarity create a pair if their similarity is $\geq$0.55 (622 of the 10{,}289
-test chunks form 311 test pairs). Of 100 sampled test pairs, a fluent isiXhosa speaker labelled 24 herself and reviewed 27 that
-a team member had labelled with AI translations and suggested labels. Of these 51, 31\% were translations,
-29\% partial and 39\% different, suggesting that the 0.55 threshold is too loose. Her own labels find more
-pairs different (54\% vs 26\%), so the reviewed ones may lean towards the AI, though $\Delta$ on pairs labelled translation or partial is similar (0.24, 0.26).
+test chunks form 311 test pairs). Of 100 sampled test pairs, a fluent isiXhosa speaker labelled 24 herself and checked 27 that had AI-suggested labels, and a second speaker labelled 16 more. Of these 67, 30\% were translations, 28\% partial and 42\% different, suggesting that the 0.55 threshold is too loose. The speakers' own labels find more pairs different (52\% vs 26\%), so the checked ones may lean to the AI, though $\Delta$ on pairs labelled translation or partial is similar (0.22 to 0.26).
 
 \textbf{Removing the language signal (pair removal).} The differences within training pairs, which are mostly language, are stacked and their top $k$
 directions are projected out of every embedding:
@@ -175,9 +172,9 @@ D=\big[\,x^{\mathrm{xh}}_i-x^{\mathrm{en}}_i\,\big]_{i\in P},\qquad
 \end{equation}
 where $V_k$ holds the top-$k$ right singular vectors of $D$. A logistic regression, weighted so both
 sections count equally, is trained on training issues to predict each chunk's section. Two settings are chosen on validation
-issues: the number of directions removed, named $k$, is the smallest value in $\{0,1,2,4,\dots,64\}$ that brings
+issues: the number of directions removed, $k$, is the smallest value in $\{0,1,2,4,\dots,64\}$ that brings
 the floor to 0.55 or below (64 if none does, as here), and the regularisation strength $C\in\{10^{-2},\dots,10^{3}\}$
-is chosen for the highest BA.
+maximises BA.
 
 \textbf{Spelling effects.} For H2, each spelling variant keeps the pairs and $k$ chosen from the original
 text, so only spelling is changed. The variant is equivalent to raw if the 90\% CI of its change in $\Delta$ lies within $\pm$0.02.
@@ -200,7 +197,7 @@ while a share $\delta$ of isiXhosa chunks use only a quarter of topics. Simulate
 pairs (unrelated chunks recorded as translations), it shrinks (0.045 vs a true 0.059). But real false pairs may
 behave differently, as they are paired for looking similar.
 
-\textbf{The classifier is above the floor (H1).} On Imvo, the classifier reaches 0.786 on all test chunks but only 0.590 on translated pairs, so $\Delta$ is 0.196 (0.167--0.224), supporting H1. Of 311 test pairs, it gives both halves one label for 201 pairs (it cannot tell which is the translation), correctly tells them apart for 83 and labels both the wrong way round for 27. $\Delta$ is positive in every Table~S2 setting (smallest 0.046) and both time periods (Figure~\ref{fig:res}b), but its size depends on the pairs used (0.117 to 0.286 across the pair sets in Table~S2). No $k$ reached the 0.55 target. Removing one direction lowered the test floor from 0.977 to 0.593, and removing more barely changed it. Removing language with only pairs of similarity $\geq$0.65 raised the floor to 0.725, as only 362 training pairs remain.
+\textbf{The classifier is above the floor (H1).} On Imvo, the classifier reaches 0.786 on all test chunks but only 0.590 on translated pairs, so $\Delta$ is 0.196 (0.167--0.224), supporting H1. Of 311 test pairs, it gives both halves one label for 201 pairs (it cannot tell which is the translation), correctly tells them apart for 83 and labels both the wrong way round for 27. $\Delta$ is positive in every Table~S2 setting (smallest 0.046) and both time periods (Figure~\ref{fig:res}b), but its size depends on the pairs used (0.117 to 0.311 across the pair sets in Table~S2). No $k$ reached the 0.55 target. Removing one direction lowered the test floor from 0.977 to 0.593, and removing more barely changed it. Removing language with only pairs of similarity $\geq$0.65 raised the floor to 0.725, as only 362 training pairs remain.
 
 \textbf{Topic accounts for much of $\Delta$.} A topic-only rule reaches 0.661 on test chunks, but only 0.523 on
 translated pairs, whose halves should share a topic. Topic accounts for about 70\% of $\Delta$ (0.138 of 0.196; Table~S2).
@@ -231,13 +228,12 @@ may control content only roughly.
 a people (\emph{Xosa}), a community (\emph{Tembu}), a town (\emph{Mtata}) and God (\emph{Tixo}). The tools
 also read English more easily (2.11 vs 1.26 LaBSE tokens per word), which may tempt researchers to study only the English half \citep{nekoto}.
 
-\textbf{Limitations.} Only 51 pairs were hand-checked and no one checked the rewrites. Topic checks use
+\textbf{Limitations.} Only 67 pairs and 94 rewrites (92 correct) were hand-checked. Topic checks use
 LaBSE only, and the method measures what was printed but cannot say why. Future archive studies should
 report the floor under both spellings.
 
 \section*{Acknowledgements}
-The authors thank Yonela Siko, a fluent isiXhosa speaker, for checking the 51 translated pairs used to verify the
-floor.
+The authors thank Yonela Siko, a fluent isiXhosa speaker, for checking 51 of the translated pairs used to verify the translation floor, and Endinako Dyantyi, an isiXhosa speaker, for labelling 16 more pairs and checking 100 of the spelling rewrites. She left 4 pairs and 6 rewrites blank because she was unsure of them.
 
 \section{Contribution Statements}
 We, Gopolang Mohlakola, Tawananyasha Kadango and Lily de Melo, worked together fairly on this project.
@@ -289,7 +285,7 @@ prefix only & .786 & .600 & .187 & $-$.009 ($-$.024, $+$.006)\\
 \toprule
 Setting & All & Floor & $\Delta$ (95\% CI)\\
 \midrule
-\textbf{Translated pairs hand-checked as full translations (16 pairs)} & \textbf{.786} & \textbf{.500} & \textbf{.286 (.142, .412)}\\
+\textbf{Translated pairs hand-checked as full translations (20 pairs)} & \textbf{.786} & \textbf{.475} & \textbf{.311 (.180, .407)}\\
 \textbf{Pairs matched on shared names and numbers,} & \textbf{.786} & \textbf{.670} & \textbf{.117 (.066, .169)}\\
 \textbf{but chunks not in translated pairs (252 chunks)} & & & \\
 All translated pairs, similarity $\geq$0.55 (311 pairs) & .786 & .590 & .196 (.167, .224)\\

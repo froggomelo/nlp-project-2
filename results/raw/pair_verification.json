@@ -1,79 +1,79 @@
 {
  "overall": {
-  "n": 51,
-  "translation": 0.314,
-  "partial": 0.294,
-  "different": 0.392
+  "n": 67,
+  "translation": 0.299,
+  "partial": 0.284,
+  "different": 0.418
  },
  "by_quartile": {
   "1": {
-   "n": 11,
-   "translation": 0.182,
-   "partial": 0.364,
-   "different": 0.455
+   "n": 17,
+   "translation": 0.118,
+   "partial": 0.294,
+   "different": 0.588
   },
   "2": {
-   "n": 13,
-   "translation": 0.231,
-   "partial": 0.231,
-   "different": 0.538
+   "n": 16,
+   "translation": 0.25,
+   "partial": 0.25,
+   "different": 0.5
   },
   "3": {
-   "n": 14,
-   "translation": 0.357,
-   "partial": 0.357,
-   "different": 0.286
+   "n": 18,
+   "translation": 0.333,
+   "partial": 0.389,
+   "different": 0.278
   },
   "4": {
-   "n": 13,
-   "translation": 0.462,
-   "partial": 0.231,
-   "different": 0.308
+   "n": 16,
+   "translation": 0.5,
+   "partial": 0.188,
+   "different": 0.312
   }
  },
  "ai_vs_human": {
   "ai_rows": 35,
-  "with_human_label": 24,
-  "raw": 0.708,
-  "cohen_kappa": 0.538
+  "with_human_label": 27,
+  "raw": 0.704,
+  "cohen_kappa": 0.535
  },
  "verified (label 2)": {
-  "pairs": 16,
-  "floor": 0.5,
+  "pairs": 20,
+  "floor": 0.475,
   "floor_ci": [
-   0.389,
-   0.65
+   0.379,
+   0.615
   ],
-  "gap": 0.286,
+  "gap": 0.311,
   "gap_ci": [
-   0.142,
-   0.412
+   0.18,
+   0.407
   ]
  },
  "label 1 or 2": {
-  "pairs": 31,
-  "floor": 0.532,
+  "pairs": 39,
+  "floor": 0.538,
   "floor_ci": [
-   0.423,
-   0.659
+   0.455,
+   0.641
   ],
-  "gap": 0.254,
+  "gap": 0.248,
   "gap_ci": [
-   0.134,
-   0.363
+   0.146,
+   0.335
   ]
  },
  "all sampled": {
-  "pairs": 51,
-  "floor": 0.539,
+  "pairs": 67,
+  "floor": 0.545,
   "floor_ci": [
-   0.46,
-   0.623
+   0.476,
+   0.615
   ],
-  "gap": 0.247,
+  "gap": 0.241,
   "gap_ci": [
-   0.165,
-   0.327
+   0.172,
+   0.314
   ]
  },
  "by_protocol": {
@@ -84,6 +84,13 @@
    "different": 0.259,
    "gap_label_1_or_2": 0.261
   },
+  "second_speaker_own": {
+   "n": 16,
+   "translation": 0.25,
+   "partial": 0.25,
+   "different": 0.5,
+   "gap_label_1_or_2": 0.224
+  },
   "speaker_own": {
    "n": 24,
    "translation": 0.208,
@@ -91,5 +98,11 @@
    "different": 0.542,
    "gap_label_1_or_2": 0.241
   }
+ },
+ "both_speakers_own": {
+  "n": 40,
+  "translation": 0.225,
+  "partial": 0.25,
+  "different": 0.525
  }
 }

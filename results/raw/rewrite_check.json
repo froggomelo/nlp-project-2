@@ -1,0 +1,68 @@
+{
+ "sampled": 100,
+ "judged": 94,
+ "left_blank": 6,
+ "correct": 92,
+ "share_correct": 0.979,
+ "token_weighted_share_correct": 0.977,
+ "by_rule": {
+  "asp": {
+   "judged": 66,
+   "correct": 66
+  },
+  "prefix_common": {
+   "judged": 9,
+   "correct": 9
+  },
+  "prefix_proper": {
+   "judged": 19,
+   "correct": 17
+  }
+ },
+ "marked_wrong": [
+  {
+   "row_id": "R025",
+   "old": "yo Mxosa",
+   "new": "yoMxosa",
+   "gold": "yoMxhosa"
+  },
+  {
+   "row_id": "R034",
+   "old": "i Bhayi",
+   "new": "iBhayi",
+   "gold": "eBhayi"
+  }
+ ],
+ "left_blank_rows": [
+  {
+   "row_id": "R006",
+   "old": "Butani",
+   "new": "Buthani"
+  },
+  {
+   "row_id": "R028",
+   "old": "kwi nkoliso",
+   "new": "kwinkoliso"
+  },
+  {
+   "row_id": "R032",
+   "old": "icibi",
+   "new": "ichibi"
+  },
+  {
+   "row_id": "R039",
+   "old": "yi Ruluneli",
+   "new": "yiRuluneli"
+  },
+  {
+   "row_id": "R076",
+   "old": "Arente",
+   "new": "Arhente"
+  },
+  {
+   "row_id": "R094",
+   "old": "okwalata",
+   "new": "okwalatha"
+  }
+ ]
+}

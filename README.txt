@@ -1,6 +1,6 @@
 # NLP Project 2: A Translation Floor for Cross-Lingual Archives: Spelling and Content Analysis in Imvo Zabantsundu
 
-This code asks whether the isiXhosa and English sections of Imvo Zabantsundu (1884–1894) differ in content once the language signal is removed from a multilingual encoder's embeddings, and whether modernising the 1880s isiXhosa spelling changes the answer. `src/` holds the code, `colab/` the notebook that produced the reported embeddings and results, `data/` the data card, issue splits and hand labels, `results/` the saved outputs the report uses, and `report/` the report (`report/report.pdf`).
+This code asks whether the isiXhosa and English sections of Imvo Zabantsundu (1884–1894) differ in content once the language signal is removed from a multilingual encoder's embeddings, and whether modernising the 1880s isiXhosa spelling changes the answer. `src/` holds the code, `colab/` the notebook that produced the reported embeddings and results, `data/` the data card, issue splits and hand labels, `results/` the saved outputs the report uses, and `report/` the report (`report/2680747_2588206_2545080_report.pdf`, built from `report/report.tex`).
 
 ## Setup
 
@@ -32,7 +32,7 @@ The modern isiXhosa corpora (Vukuzenzele, isiXhosa Wikipedia and OPUS-100 en-xh)
 | 1. Text preparation | `python -m src.run_all prepare` | Cleans and chunks the text (60 words), flags repeated text, splits issues 70/15/15 by year, builds the modern word list and spelling variants, measures tool fit, and runs the simulation. | About 5 minutes on a CPU |
 | 2. Embeddings | `python -m src.embedding.make_colab_bundle`, then `colab/embed_on_kaggle.ipynb` | Uploads `colab/colab_bundle.zip` to the notebook, which embeds every variant. Unzip the downloaded `embeddings_all.zip` into `data/embeddings/`. The notebook also runs stage 3. | About 1 hour on a free Kaggle Tesla T4 GPU |
 | 3. Analysis | `python -m src.run_all analyse --threshold 0.55` and `python -m src.run_all analyse --threshold 0.55 --model-tag multilingual-e5-base` | Translated pairs, language removal, the section classifier with `k` and `C` chosen on validation issues, spelling comparisons with paired bootstrap CIs and the H2 verdict, and topic clusters. | About 15 minutes per encoder on a CPU |
-| 4. Post-hoc checks | The six commands below | Floors on other pair sets, the topic-only rule, where errors fall, pair outcomes and the hand-check scores. These need no retraining. | Minutes on a CPU |
+| 4. Post-hoc checks | The seven commands below | Floors on other pair sets, the topic-only rule, where errors fall, pair outcomes and the hand-check scores. These need no retraining. | Minutes on a CPU |
 
 ```bash
 python -m src.posthoc.posthoc_checks . > results/posthoc_checks.txt
@@ -40,6 +40,7 @@ python -m src.posthoc.floor_checks > results/floor_checks.txt
 python -m src.posthoc.topic_errors > results/topic_errors.txt
 python -m src.posthoc.pair_cases . > results/pair_cases.md
 python -m src.posthoc.verify_pairs
+python -m src.posthoc.rewrite_check
 python -m src.figures.report_figures
 ```
 
@@ -60,7 +61,8 @@ Do the same for `modern_asp` and `modern_prefix`. For the second encoder, add `-
 | Figure 1b, Table S1, H2 | `results/compare/compare.md`, and `results/compare__multilingual-e5-base/compare.md` for E5 |
 | Main result, floor, `k` and `C` | `results/raw/stage1.json` |
 | Pair outcomes (201, 83, 27) | `results/pair_cases.md` |
-| Hand-checked pairs | `data/pair_labels.csv`, scored in `results/raw/pair_verification.json` |
+| Hand-checked pairs (67) | `data/pair_labels.csv` and `data/hand_checks/`, scored in `results/raw/pair_verification.json` |
+| Hand-checked rewrites (92 of 94) | `data/hand_checks/`, scored in `results/raw/rewrite_check.json` |
 | Stricter pairs | `results/floor_checks.txt` |
 | Language removal learned from stricter pairs (0.725) | `results/raw_thr0.65/stage1.json` |
 | Pairs matched on names and numbers | `results/posthoc_checks.txt`, check 5 |
@@ -92,7 +94,11 @@ The conclusions held in both runs: Δ stays positive, H2 stays inconclusive, str
 
 ## Hand labels
 
-Of 100 sampled test pairs, a fluent isiXhosa speaker labelled 24 herself. She also checked all 27 that a team member had labelled with AI translations and suggested labels, changing the ones she disagreed with. Labels were 2 (translation), 1 (partial) and 0 (different). `data/pair_labels.csv` holds one row per sampled pair, with the final label, how it was labelled, and the AI suggestion, which is only compared with the final labels and never used as one. For the 27, `speaker_mark` holds her mark. She left a row blank when she kept its label, so `speaker_mark_source` is `written` for the 14 she marked and `kept` for the 13 she left unchanged. `src/posthoc/verify_pairs.py` scores it and writes `results/raw/pair_verification.json`. The rest of the pipeline needs no labels.
+Of 100 sampled test pairs, 67 were labelled 2 (translation), 1 (partial) or 0 (different). Yonela Siko, a fluent isiXhosa speaker, labelled 24 herself. She also checked all 27 that a team member had labelled with AI translations and suggested labels, changing the ones she disagreed with. Endinako Dyantyi, an isiXhosa speaker, labelled 16 more herself, leaving 4 blank because she was unsure of them. `data/pair_labels.csv` holds one row per sampled pair, with the final label, who gave it (`labeller`), how it was labelled (`protocol`), and the AI suggestion, which is only compared with the final labels and never used as one. For the 27, `speaker_mark` holds Yonela's mark. She left a row blank when she kept its label, so `speaker_mark_source` is `written` for the 14 she marked and `kept` for the 13 she left unchanged. `src/posthoc/verify_pairs.py` scores it and writes `results/raw/pair_verification.json`.
+
+Endinako Dyantyi also checked 100 sampled spelling rewrites in context, leaving 6 blank because she was unsure of them; 92 of the 94 she judged were correct. `src/posthoc/rewrite_check.py` scores them and writes `results/raw/rewrite_check.json`.
+
+`data/hand_checks/` holds both speakers' workbooks and the same sheets as CSV files (see its README.txt). The rest of the pipeline needs no labels.
 
 ## Key design decisions
 
